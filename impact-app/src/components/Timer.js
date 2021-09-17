@@ -1,7 +1,7 @@
 
 function Timer({ name }) {
   return (
-    <div className="timer">
+    <div className="timer test-box">
       <div className="timer-start">
         Start
       </div>

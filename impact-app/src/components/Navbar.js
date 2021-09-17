@@ -1,7 +1,7 @@
 
 function Navbar() {
   return (
-    <div className="navbar">
+    <div className="navbar test-box">
       <ul>
         <li>Home</li>
         <li>Graphs</li>

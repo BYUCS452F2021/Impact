@@ -1,8 +1,10 @@
 
 function Header() {
   return (
-    <div className="header">
-      Impact
+    <div className="header test-box">
+      <h1>
+        Impact
+      </h1>
     </div>
   );
 }

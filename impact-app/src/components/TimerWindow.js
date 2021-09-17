@@ -2,7 +2,7 @@ import Timer from "./Timer";
 
 function TimerWindow() {
   return (
-    <div className="timer-window">
+    <div className="timer-window test-box">
       <Timer name="cs452">
 
       </Timer>
