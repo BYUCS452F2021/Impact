@@ -1,15 +1,16 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
-.pnp.js
+/back-end/node_modules
+/impact-app/node_modules
+/impact-app/.pnp
+/impact-app.pnp.js
 
 # testing
-/coverage
+/impact-app/coverage
 
 # production
-/build
+/impact-app/build
 
 # misc
 .DS_Store
@@ -18,6 +19,6 @@
 .env.test.local
 .env.production.local
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+/impact-appnpm-debug.log*
+/impact-appyarn-debug.log*
+/impact-appyarn-error.log*
