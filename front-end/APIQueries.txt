@@ -1,0 +1,22 @@
+User:
+    Add user:
+    INSERT INTO User (FirstName, LastName, Username, Password) VALUES ?
+
+    Delete user:
+    DELETE FROM User WHERE Username = ?
+
+    Update user:
+    UPDATE User SET ? = ? WHERE ? = ?
+    1. column to update
+    2. new value
+    3. userID
+    4. userID value
+
+Time:
+    Add Timer Click:
+    INSERT INTO Time (TaskID, StartTimeStamp, EndTimeStamp) VALUES ?
+        EndTimeStamp will always be null at first, need to call update
+        when timer is stopped
+
+    Update End Time:
+    UPDATE Time SET EndTimeStamp = ? WHERE TaskID = ?
