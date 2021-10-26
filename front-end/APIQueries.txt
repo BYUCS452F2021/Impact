@@ -1,0 +1,17 @@
+Project:
+add a project
+    INSERT INTO Project (UserID, ProjectName) VALUES ?
+update a project (updates the name)
+    UPDATE Project SET ProjectName = ? WHERE ProjectID = ?
+delete a project
+    DELETE * FROM Project WHERE ProjectID = ?
+
+Task:
+add a task
+    INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES ?
+delete a task
+    DELETE * FROM Task WHERE TaskID = ?
+update TaskName
+    UPDATE Task SET TaskName = ? WHERE TaskID = ?
+update task TotalTime
+    UPDATE Task SET TotalTime = ? WHERE TaskID = ?
