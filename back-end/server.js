@@ -13,6 +13,14 @@ con.connect(function(err) {
   console.log("Connected!");
 });
 
+//Project API
+
+//Task API
+
+//Time API
+
+//User API
+
 // // PROJECT API
 // app.post('/api/projects', async (req, res) => {
 //   const project = new Project({
