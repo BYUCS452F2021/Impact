@@ -1,6 +1,12 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 const mysql = require("mysql");
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 
 var con = mysql.createConnection({
   host: "localhost",
@@ -80,10 +86,11 @@ app.delete("/api/tasks/:id", async (req, res) => {
 //Time API
 
 //User API
-
     //Register a User
+
 app.post('/api/user/register', async (req, res) => {
   var sql = "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
+  console.log(req.body);
   con.query(sql, [
     req.body.firstName,
     req.body.lastName,
@@ -91,8 +98,27 @@ app.post('/api/user/register', async (req, res) => {
     req.body.password
   ], function (err, result) {
     if (err) throw err;
+    console.log(result);
     console.log("1 user inserted");
   });
+app.post("/api/user/register", async (req, res) => {
+  var sql =
+    "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
+  con.query(
+    sql,
+    [
+      req.body.firstName,
+      req.body.lastName,
+      req.body.username,
+      req.body.password,
+    ],
+    function (err, result) {
+      if (err) throw err;
+      console.log("1 user inserted")
+      res.sendStatus(500);
+    }
+  );
+  res.sendStatus(200);
 });
 
 
@@ -102,7 +128,7 @@ app.get('/api/user/login', async (req, res) => {
   // password, otherwise return an error.
   if (!req.body.username || !req.body.password) return res.sendStatus(400);
 
-  var sql = 
+  var sql = ""
   
 });
 
