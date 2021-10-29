@@ -53,7 +53,7 @@ app.get("/api/projects", async (req, res) => {
 
 //Delete the project
 app.delete("/api/projects/:projectId", async (req, res) => {
-  var sql = "DELETE * FROM Project WHERE ProjectID = ?";
+  var sql = "DELETE * FROM Project WHERE ProjectID = ?;";
   con.query(sql, [req.params.projectId], function (err, result) {
     if (err) {
       res.sendStatus(500);
@@ -83,7 +83,6 @@ app.post('/api/projects/:projectID/timers', async (req, res) => {
 //get all tasks for a project
 app.get("/api/projects/:projectID/timers", async (req, res) => {
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
- 
     con.query(sql, [req.params.projectID], function (error, results) {
       if (error) {
         console.error("Error while getting tasks for project", err.message);
@@ -93,9 +92,6 @@ app.get("/api/projects/:projectID/timers", async (req, res) => {
       res.sendStatus(200);
       res.send(result)
     });
-  
-    
-  }
 });
 
 //Stop timer
@@ -109,7 +105,24 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
     console.log("Timer stopped");
     let task = result;
     task.TotalTime =
-      task.TotalTime + (Date.now() / 1000 / 60 - timer.lastEdited / 1000 / 60);
+      task.TotalTime + (Date.now() / 1000 / 60 - task.LastEdited / 1000 / 60);
+    task.LastEdited = Date.now();
+    var sqlUpdateTime = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
+    con.query(sqlUpdateTime, [task.TotalTime, task.TaskID], function (err, result) {
+      if (err) {
+        res.sendStatus(500);
+        throw err;
+      }
+      console.log("Time updated");
+    });
+    var sqlUpdateLastEdited = "UPDATE Task SET LastEdited = ? WHERE TaskId = ?";
+    con.query(sqlUpdateLastEdited, [task.LastEdited, task.TaskID], function (err, result) {
+      if (err) {
+        res.sendStatus(500);
+        throw err;
+      }
+      console.log("LastEdited updated");
+    });
     res.sendStatus(200);
   });
 });
@@ -131,7 +144,7 @@ app.put("/api/tasks/:id", async (req, res) => {
 });
 
 //delete a task
-app.delete("/api/tasks/:id", async (req, res) => {
+app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
   var sql = "DELETE FROM Task WHERE TaskID = ?;";
     con.query(sql)[req.body.TaskID], function (err, results) {
       if (err) {
@@ -144,7 +157,7 @@ app.delete("/api/tasks/:id", async (req, res) => {
     };
 });
 
-//Time API
+//Time API - implement post MVP 
 
 //User API
 //Register a User
