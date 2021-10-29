@@ -45,7 +45,7 @@ app.post('/api/tasks', async (req, res) => {
 });
 
 //get all tasks for a project
-app.get('api/project/:id/tasks', async (req, res) => {
+app.get('api/projects/:id/tasks', async (req, res) => {
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
   try {
     con.query(sql)[req.body.ProjectID], function(error, results){};
