@@ -88,7 +88,7 @@ export default {
         return;
       }
       try {
-        let response = await axios.post("/api/users/register", {
+        let response = await axios.post("/api/user/register", {
           firstName: this.firstName,
           lastName: this.lastName,
           username: this.username,
@@ -105,7 +105,7 @@ export default {
     async login() {
       if (!this.usernameLogin || !this.passwordLogin) return;
       try {
-        let response = await axios.post("/api/users/login", {
+        let response = await axios.post("/api/user/login", {
           username: this.usernameLogin,
           password: this.passwordLogin,
         });
