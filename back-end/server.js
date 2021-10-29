@@ -21,6 +21,20 @@ con.connect(function(err) {
 //Time API
 
 //User API
+app.post('/api/users/register', async (req, res) => {
+  var sql = "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
+  con.query(sql, [
+    req.body.firstName,
+    req.body.lastName,
+    req.body.username,
+    req.body.password
+  ], function (err, result) {
+    if (err) throw err;
+    console.log("1 user inserted");
+  });
+});
+
+
 
 // // PROJECT API
 // app.post('/api/projects', async (req, res) => {
