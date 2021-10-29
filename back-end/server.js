@@ -4,9 +4,11 @@ const mysql = require("mysql");
 const app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+app.use(
+  bodyParser.urlencoded({
+    extended: false,
+  })
+);
 
 var con = mysql.createConnection({
   host: "localhost",
@@ -77,25 +79,45 @@ app.post('/api/projects/:projectID/timers', async (req, res) => {
     });
 
 //get all tasks for a project
-app.get("api/projects/:id/tasks", async (req, res) => {
+app.get("/api/projects/:projectID/timers", async (req, res) => {
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
-  try {
-    con.query(sql)[req.body.ProjectID], function (error, results) {};
-  } catch (err) {
-    console.error("Error while getting tasks for project", err.message);
-    next(err);
+ 
+    con.query(sql, [req.params.projectID], function (error, results) {
+      if (error) {
+        console.error("Error while getting tasks for project", err.message);
+        res.sendStatus(500);
+        throw(error);
+      }
+    });
+  
+    
   }
 });
 
+//Stop timer
+app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
+  var sqlSelect = "SELECT * FROM Task WHERE TaskID = ?";
+  con.query(sqlSelect, [req.params.timerID], function (err, result) {
+    if (err) {
+      res.sendStatus(500);
+      throw err;
+    }
+    console.log("Timer stopped");
+    let task = result;
+    task.TotalTime =
+      task.TotalTime + (Date.now() / 1000 / 60 - timer.lastEdited / 1000 / 60);
+    res.sendStatus(200);
+  });
+});
+
 //update a task's TotalTime
-app.put('/api/tasks/:id', async (req, res) => {
-  var sql = 'UPDATE Task SET TotalTime = ? WHERE TaskID = ?';
+app.put("/api/tasks/:id", async (req, res) => {
+  var sql = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
   try {
-    con.query(sql)[
-      req.body.TotalTime, req.body.TaskID
-    ], function(error, results){};
+    con.query(sql)[(req.body.TotalTime, req.body.TaskID)],
+      function (error, results) {};
   } catch (err) {
-    console.error('Error while updating TotalTime', err.message);
+    console.error("Error while updating TotalTime", err.message);
   }
 });
 
@@ -112,39 +134,45 @@ app.delete("/api/tasks/:id", async (req, res) => {
 //Time API
 
 //User API
-    //Register a User
+//Register a User
 
-app.post('/api/user/register', async (req, res) => {
-  var sql = "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
+app.post("/api/user/register", async (req, res) => {
+  var sql =
+    "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
   console.log(req.body);
-  con.query(sql, [
-    req.body.firstName,
-    req.body.lastName,
-    req.body.username,
-    req.body.password
-  ], function (err, result) {
-    if (err) throw err;
-    console.log(result);
-    console.log("1 user inserted");
-  });
+  con.query(
+    sql,
+    [
+      req.body.firstName,
+      req.body.lastName,
+      req.body.username,
+      req.body.password,
+    ],
+    function (err, result) {
+      if (err) throw err;
+      console.log(result);
+      console.log("1 user inserted");
+    }
+  );
 });
 
 // login a user
-app.get('/api/user/login', async (req, res) => {
+app.get("/api/user/login", async (req, res) => {
   // Make sure that the form coming from the browser includes a username and a
   // password, otherwise return an error.
   if (!req.body.username || !req.body.password) return res.sendStatus(400);
 
   var sql = "SELECT * FROM User WHERE UserName = ? AND Password = ?;";
   console.log(req.body);
-  con.query(sql, [
-    req.body.username,
-    req.body.password
-  ], function (err, result) {
-    if (err) throw err;
-    console.log(result);
-    console.log("valid user found");
-  });
+  con.query(
+    sql,
+    [req.body.username, req.body.password],
+    function (err, result) {
+      if (err) throw err;
+      console.log(result);
+      console.log("valid user found");
+    }
+  );
 });
 
 // // PROJECT API
