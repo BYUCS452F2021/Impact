@@ -70,6 +70,8 @@ app.delete('/api/tasks/:id', async (req, res) => {
 //Time API
 
 //User API
+
+    //Register a User
 app.post('/api/user/register', async (req, res) => {
   var sql = "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
   con.query(sql, [
@@ -84,9 +86,8 @@ app.post('/api/user/register', async (req, res) => {
 });
 
 
-
 // login a user
-app.post('/api/companies/login', async (req, res) => {
+app.get('/api/user/login', async (req, res) => {
   // Make sure that the form coming from the browser includes a username and a
   // password, otherwise return an error.
   if (!req.body.username || !req.body.password)
