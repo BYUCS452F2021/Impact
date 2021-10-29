@@ -28,7 +28,8 @@
         <form class="pure-form">
           <fieldset>
             <legend>Register for an account</legend>
-            <input placeholder="company name" v-model="companyName" />
+            <input placeholder="first name" v-model="firstName" />
+            <input placeholder="last name" v-model="lastName" />
           </fieldset>
           <fieldset>
             <input placeholder="username" v-model="username" />
@@ -59,7 +60,8 @@ export default {
   name: "Login",
   data() {
     return {
-      companyName: "",
+      firstName: "",
+      lastName: "",
       username: "",
       password: "",
       usernameLogin: "",
@@ -68,32 +70,33 @@ export default {
       errorLogin: "",
     };
   },
-  async created() {
-    try {
-      let response = await axios.get("/api/companies");
-      this.$root.$data.company = response.data.company;
-    } catch (error) {
-      this.$root.$data.company = null;
-    }
-  },
+  // async created() {
+  //   try {
+  //     let response = await axios.get("/api/companies");
+  //     this.$root.$data.company = response.data.company;
+  //   } catch (error) {
+  //     this.$root.$data.company = null;
+  //   }
+  // },
   methods: {
     async register() {
       this.error = "";
       this.errorLogin = "";
       console.log("register hit");
-      if (!this.companyName || !this.username || !this.password) {
+      if (!this.firstName || !this.lastName || !this.username || !this.password) {
         console.log("returning");
         return;
       }
       try {
-        let response = await axios.post("/api/companies", {
-          companyName: this.companyName,
+        let response = await axios.post("/api/users/register", {
+          firstName: this.firstName,
+          lastName: this.lastName,
           username: this.username,
           password: this.password,
         });
         console.log(response);
-        this.$root.$data.company = response.data.company;
-        this.$router.push({ name: "Launchpad" });
+        this.$root.$data.user = response.data.user;
+        this.$router.push({ name: "Home" });
       } catch (error) {
         this.error = error.response.data.message;
         this.$root.$data.user = null;
@@ -102,12 +105,12 @@ export default {
     async login() {
       if (!this.usernameLogin || !this.passwordLogin) return;
       try {
-        let response = await axios.post("/api/companies/login", {
+        let response = await axios.post("/api/users/login", {
           username: this.usernameLogin,
           password: this.passwordLogin,
         });
-        this.$root.$data.company = response.data.company;
-        this.$router.push({ name: "Launchpad" });
+        this.$root.$data.user = response.data.user;
+        this.$router.push({ name: "Home" });
       } catch (error) {
         this.errorLogin = "Error: " + error.response.data.message;
         this.$root.$data.user = null;
