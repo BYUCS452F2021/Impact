@@ -27,8 +27,13 @@ con.connect(function (err) {
 app.post("/api/projects", async (req, res) => {
   var sql = "INSERT INTO Project (UserID, ProjectName) VALUES (?, ?);";
   con.query(sql, [req.userId, req.title], function (err, result) {
-    if (err) throw err;
+    if (err)  {
+      res.sendStatus(500);
+      throw err;
+    }
     console.log("1 record inserted");
+    res.sendStatus(200);
+    res.send(result);
   });
 });
 
@@ -36,38 +41,46 @@ app.post("/api/projects", async (req, res) => {
 app.get("/api/projects", async (req, res) => {
   var sql = "SELECT * FROM Project;";
   con.query(sql, function (err, result) {
-    if (err) throw err;
+    if (err)  {
+      sendStatus(500);
+      throw err;
+    }
+    res.sendStatus(200);
+    res.send(result)
     console.log("All records selected");
   });
 });
 
 //Delete the project
 app.delete("/api/projects/:projectId", async (req, res) => {
-  var sql = "DELETE * FROM Project WHERE ProjectID = ?";
+  var sql = "DELETE * FROM Project WHERE ProjectID = ?;";
   con.query(sql, [req.params.projectId], function (err, result) {
-    if (err) throw err;
+    if (err) {
+      res.sendStatus(500);
+      throw err;
+    }
     console.log("Record deleted");
+    res.sendStatus(200);
+    res.send(result);
   });
 });
 
 //Task API
 //add a task
-app.post("/api/projects/:projectID/timers", async (req, res) => {
-  var sql =
-    "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
-  try {
-    con.query(sql)[(req.params.projectID, req.body.title)],
-      function (error, results) {};
-  } catch (err) {
-    console.error(`Error while creating task`, err.message);
-    next(err);
-  }
+app.post('/api/projects/:projectID/timers', async (req, res) => {
+  var sql = "INSERT INTO Task (ProjectID, TaskName) VALUES (?, ?);";
+    try {
+    con.query(sql, [req.params.projectID, req.body.title],
+      function(error, results){});
+    } catch (err) {
+      console.error(`Error while creating task`, err.message);
+      next(err);
+    }
 });
 
 //get all tasks for a project
 app.get("/api/projects/:projectID/timers", async (req, res) => {
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
- 
     con.query(sql, [req.params.projectID], function (error, results) {
       if (error) {
         console.error("Error while getting tasks for project", err.message);
@@ -75,9 +88,6 @@ app.get("/api/projects/:projectID/timers", async (req, res) => {
         throw(error);
       }
     });
-  
-    
-  }
 });
 
 //Stop timer
@@ -114,27 +124,37 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
 });
 
 //update a task's TotalTime
-app.put("/api/tasks/:id", async (req, res) => {
-  var sql = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
-  try {
-    con.query(sql)[(req.body.TotalTime, req.body.TaskID)],
-      function (error, results) {};
-  } catch (err) {
-    console.error("Error while updating TotalTime", err.message);
-  }
+// app.put('/api/tasks/:id', async (req, res) => {
+//   var sql = 'UPDATE Task SET TotalTime = ? WHERE TaskID = ?';
+//   try {
+//     con.query(sql[
+//       req.body.TotalTime, req.body.TaskID
+//     ], function(error, results){});
+//   } catch (err) {
+//     console.error('Error while updating TotalTime', err.message);
+//   }
+// });
+
+//start a task's timer
+app.put("/api/projects/:projectID/timers/:timerID/start", async (req, res) => {
+  var sql = "UPDATE Timer SET LastEdited = ? WHERE TaskID = ?;";
+  con.query(sql, [Date.now(), req.body.timerName], function (err, result) {
+    if (err) throw err;
+    console.log("Error starting a timer");
+  });  
 });
 
 //delete a task
-app.delete("/api/tasks/:id", async (req, res) => {
+app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
   var sql = "DELETE FROM Task WHERE TaskID = ?;";
   try {
-    con.query(sql)[req.body.TaskID], function (error, results) {};
+    con.query(sql[req.body.timerName], function (error, results) {});
   } catch (err) {
     console.error("Error while deleting task", err.message);
   }
 });
 
-//Time API
+//Time API - implement post MVP 
 
 //User API
 //Register a User
