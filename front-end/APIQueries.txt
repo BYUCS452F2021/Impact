@@ -1,10 +1,12 @@
 Project:
 add a project
     INSERT INTO Project (UserID, ProjectName) VALUES ?
-update a project (updates the name)
+------------update a project (updates the name) DON'T NEED RIGHT NOW------------
     UPDATE Project SET ProjectName = ? WHERE ProjectID = ?
 delete a project
     DELETE * FROM Project WHERE ProjectID = ?
+get all projects
+    SELECT * FROM Project;
 
 Task:
 add a task

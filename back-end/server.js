@@ -1,20 +1,35 @@
-const express = require('express');
-const mysql = require('mysql');
+const express = require("express");
+const mysql = require("mysql");
 const app = express();
 
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "password",
-  database: "impact"
+  database: "impact",
 });
 
-con.connect(function(err) {
+con.connect(function (err) {
   if (err) throw err;
   console.log("Connected!");
 });
 
 //Project API
+app.post("/api/projects", async (req, res) => {
+  var sql = "INSERT INTO Project (UserID, ProjectName) VALUES (?, ?);";
+  con.query(sql, [req.userId, req.title], function (err, result) {
+    if (err) throw err;
+    console.log("1 record inserted");
+  });
+});
+
+app.get("/api/projects", async (req, res) => {
+  var sql = "SELECT * FROM Project;";
+  con.query(sql, function (err, result) {
+    if (err) throw err;
+    console.log("All records selected");
+  });
+});
 
 //Task API
 
@@ -163,4 +178,4 @@ con.connect(function(err) {
 //   }
 // });
 
-app.listen(3000, () => console.log('Server listening on port 3000!'));
+app.listen(3000, () => console.log("Server listening on port 3000!"));
