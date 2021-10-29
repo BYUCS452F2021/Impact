@@ -15,6 +15,7 @@ con.connect(function (err) {
 });
 
 //Project API
+//Add a project
 app.post("/api/projects", async (req, res) => {
   var sql = "INSERT INTO Project (UserID, ProjectName) VALUES (?, ?);";
   con.query(sql, [req.userId, req.title], function (err, result) {
@@ -23,6 +24,7 @@ app.post("/api/projects", async (req, res) => {
   });
 });
 
+//Get all project
 app.get("/api/projects", async (req, res) => {
   var sql = "SELECT * FROM Project;";
   con.query(sql, function (err, result) {
@@ -31,39 +33,47 @@ app.get("/api/projects", async (req, res) => {
   });
 });
 
+//Delete the project
+app.delete("/api/projects/:projectId", async (req, res) => {
+  var sql = "DELETE * FROM Project WHERE ProjectID = ?";
+  con.query(sql, [req.params.projectId], function (err, result) {
+    if (err) throw err;
+    console.log("Record deleted");
+  });
+});
+
 //Task API
 //add a task
-app.post('/api/tasks', async (req, res) => {
-  var sql = "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
-    try {
-    con.query(sql)[req.body.ProjectID, req.body.TaskName, req.body.TotalTime],
-      function(error, results){};
-    } catch (err) {
-      console.error(`Error while creating task`, err.message);
-      next(err);
-    }
+app.post("/api/tasks", async (req, res) => {
+  var sql =
+    "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
+  try {
+    con.query(sql)[(req.body.ProjectID, req.body.TaskName, req.body.TotalTime)],
+      function (error, results) {};
+  } catch (err) {
+    console.error(`Error while creating task`, err.message);
+    next(err);
+  }
 });
 
 //get all tasks for a project
-app.get('api/project/:id/tasks', async (req, res) => {
+app.get("api/project/:id/tasks", async (req, res) => {
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
   try {
-    con.query(sql)[req.body.ProjectID], function(error, results){};
+    con.query(sql)[req.body.ProjectID], function (error, results) {};
   } catch (err) {
-    console.error('Error while getting tasks for project', err.message);
+    console.error("Error while getting tasks for project", err.message);
     next(err);
   }
 });
 
 //delete a task
-app.delete('/api/tasks/:id', async (req, res) => {
-  var sql = 'DELETE FROM Task WHERE TaskID = ?;';
+app.delete("/api/tasks/:id", async (req, res) => {
+  var sql = "DELETE FROM Task WHERE TaskID = ?;";
   try {
-    con.query(sql)[
-      req.body.TaskID    
-    ], function(error, results){}; 
+    con.query(sql)[req.body.TaskID], function (error, results) {};
   } catch (err) {
-      console.error('Error while deleting task', err.message);
+    console.error("Error while deleting task", err.message);
   }
 });
 
@@ -72,40 +82,44 @@ app.delete('/api/tasks/:id', async (req, res) => {
 //User API
 
 // Register a user
-app.post('/api/user/register', async (req, res) => {
+app.post("/api/user/register", async (req, res) => {
   // Make sure that the form coming from the browser includes a username and a
   // passsword, otherwise return an error. A 400 error means the request was
   // malformed.
   console.log("register hit");
-  if (!req.body.username || !req.body.password || !req.body.firstName || !req.body.lastName)
+  if (
+    !req.body.username ||
+    !req.body.password ||
+    !req.body.firstName ||
+    !req.body.lastName
+  )
     return res.status(400).send({
-      message: "firstName, lastName, username and password are required"
+      message: "firstName, lastName, username and password are required",
     });
 
   try {
-
     //  Check to see if username already exists and if not send a 403 error. A 403
     // error means permission denied.
     const existingCompany = await Company.findOne({
-      username: req.body.username
+      username: req.body.username,
     });
     if (existingCompany)
       return res.status(403).send({
-        message: "username already exists"
+        message: "username already exists",
       });
 
     // create a new user and save it to the database
     const company = new Company({
       companyName: req.body.companyName,
       username: req.body.username,
-      password: req.body.password
+      password: req.body.password,
     });
     await company.save();
     // set user session info
     req.session.companyID = company._id;
     // send back a 200 OK response, along with the user that was created
     return res.send({
-      company: company
+      company: company,
     });
   } catch (error) {
     console.log(error);
@@ -114,34 +128,33 @@ app.post('/api/user/register', async (req, res) => {
 });
 
 // login a user
-app.post('/api/companies/login', async (req, res) => {
+app.post("/api/companies/login", async (req, res) => {
   // Make sure that the form coming from the browser includes a username and a
   // password, otherwise return an error.
-  if (!req.body.username || !req.body.password)
-    return res.sendStatus(400);
+  if (!req.body.username || !req.body.password) return res.sendStatus(400);
 
   try {
     //  lookup user record
     const company = await Company.findOne({
-      username: req.body.username
+      username: req.body.username,
     });
     // Return an error if user does not exist.
     if (!company)
       return res.status(403).send({
-        message: "username or password is wrong"
+        message: "username or password is wrong",
       });
 
     // Return the SAME error if the password is wrong. This ensure we don't
     // leak any information about which users exist.
-    if (!await company.comparePassword(req.body.password))
+    if (!(await company.comparePassword(req.body.password)))
       return res.status(403).send({
-        message: "username or password is wrong"
+        message: "username or password is wrong",
       });
 
     // set user session info
     req.session.companyID = company._id;
     return res.send({
-      company: company
+      company: company,
     });
   } catch (error) {
     console.log(error);
