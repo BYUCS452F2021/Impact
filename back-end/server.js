@@ -17,6 +17,40 @@ con.connect(function(err) {
 //Project API
 
 //Task API
+//add a task
+app.post('/api/tasks', async (req, res) => {
+  var sql = "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
+    try {
+    con.query(sql)[req.body.ProjectID, req.body.TaskName, req.body.TotalTime],
+      function(error, results){};
+    } catch (err) {
+      console.error(`Error while creating task`, err.message);
+      next(err);
+    }
+});
+
+//get all tasks for a project
+app.get('api/project/:id/tasks', async (req, res) => {
+  var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
+  try {
+    con.query(sql)[req.body.ProjectID], function(error, results){};
+  } catch (err) {
+    console.error('Error while getting tasks for project', err.message);
+    next(err);
+  }
+});
+
+//delete a task
+app.delete('/api/tasks/:id', async (req, res) => {
+  var sql = 'DELETE FROM Task WHERE TaskID = ?;';
+  try {
+    con.query(sql)[
+      req.body.TaskID    
+    ], function(error, results){}; 
+  } catch (err) {
+      console.error('Error while deleting task', err.message);
+  }
+});
 
 //Time API
 
