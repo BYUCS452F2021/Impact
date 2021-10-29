@@ -33,10 +33,10 @@ app.get("/api/projects", async (req, res) => {
 
 //Task API
 //add a task
-app.post('/api/tasks', async (req, res) => {
+app.post('/api/projects/:projectID/timers', async (req, res) => {
   var sql = "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
     try {
-    con.query(sql)[req.body.ProjectID, req.body.TaskName, req.body.TotalTime],
+    con.query(sql)[req.params.projectID, req.body.title],
       function(error, results){};
     } catch (err) {
       console.error(`Error while creating task`, err.message);
@@ -52,6 +52,18 @@ app.get('api/projects/:id/tasks', async (req, res) => {
   } catch (err) {
     console.error('Error while getting tasks for project', err.message);
     next(err);
+  }
+});
+
+//update a task's TotalTime
+app.put('/api/tasks/:id', async (req, res) => {
+  var sql = 'UPDATE Task SET TotalTime = ? WHERE TaskID = ?';
+  try {
+    con.query(sql)[
+      req.body.TotalTime, req.body.TaskID
+    ], function(error, results){};
+  } catch (err) {
+    console.error('Error while updating TotalTime', err.message);
   }
 });
 
