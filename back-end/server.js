@@ -37,48 +37,6 @@ app.get("/api/projects", async (req, res) => {
 
 //User API
 
-// Register a user
-app.post('/api/user/register', async (req, res) => {
-  // Make sure that the form coming from the browser includes a username and a
-  // passsword, otherwise return an error. A 400 error means the request was
-  // malformed.
-  console.log("register hit");
-  if (!req.body.username || !req.body.password || !req.body.firstName || !req.body.lastName)
-    return res.status(400).send({
-      message: "firstName, lastName, username and password are required"
-    });
-
-  try {
-
-    //  Check to see if username already exists and if not send a 403 error. A 403
-    // error means permission denied.
-    const existingCompany = await Company.findOne({
-      username: req.body.username
-    });
-    if (existingCompany)
-      return res.status(403).send({
-        message: "username already exists"
-      });
-
-    // create a new user and save it to the database
-    const company = new Company({
-      companyName: req.body.companyName,
-      username: req.body.username,
-      password: req.body.password
-    });
-    await company.save();
-    // set user session info
-    req.session.companyID = company._id;
-    // send back a 200 OK response, along with the user that was created
-    return res.send({
-      company: company
-    });
-  } catch (error) {
-    console.log(error);
-    return res.sendStatus(500);
-  }
-});
-
 // login a user
 app.post('/api/companies/login', async (req, res) => {
   // Make sure that the form coming from the browser includes a username and a
