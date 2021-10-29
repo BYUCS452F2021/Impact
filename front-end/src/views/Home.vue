@@ -1,11 +1,11 @@
 <template>
   <div class="home">
     <div class="welcome">
-        <div class="welcome-box">
-          <h1>IMPACT</h1>
-          <p>Track your time, make a difference</p>
-        </div>
+      <div class="welcome-box">
+        <h1>IMPACT</h1>
+        <p>Track your time, make a difference</p>
       </div>
+    </div>
     <div class="main-content">
       <form class="add-project-form" @submit.prevent="addProject">
         <input type="text" v-model="projectName" />
@@ -33,6 +33,7 @@ export default {
     return {
       projectName: "",
       projects: [],
+      userId: "",
     };
   },
   created() {
@@ -44,6 +45,7 @@ export default {
         try {
           await axios.post("/api/projects", {
             title: this.projectName,
+            userId: this.$root.$data.user.UserID,
           });
           this.projectName = "";
           await this.getProjects();
@@ -54,7 +56,8 @@ export default {
     },
     async getProjects() {
       try {
-        const response = await axios.get("/api/projects");
+        const response = await axios.get(`/api/projects/${this.$root.$data.user.UserID}`);
+        console.log(response.data);
         this.projects = response.data;
       } catch (error) {
         console.log(error);
@@ -62,7 +65,7 @@ export default {
     },
     async deleteProject(project) {
       try {
-        await axios.delete(`/api/projects/${project._id}`);
+        await axios.delete(`/api/projects/${project.ProjectID}`);
         await this.getProjects();
       } catch (error) {
         console.log(error);

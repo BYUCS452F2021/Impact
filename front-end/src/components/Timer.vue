@@ -3,12 +3,12 @@
     <div
       class="timer-toggle"
       v-on:click="toggleTimer()"
-      v-bind:style="[timer.active ? { 'background-color': '#ce3d35' } : { 'background-color': '#5daa5d' }]"
+      v-bind:style="[timer.Active ? { 'background-color': '#ce3d35' } : { 'background-color': '#5daa5d' }]"
     >
       <p>{{ timerText }}</p>
     </div>
     <div class="timer-title">
-      <p>{{ timer.title }}</p>
+      <p>{{ timer.TaskName }}</p>
     </div>
     <div class="timer-total">
       <p>{{ timerTime }} min</p>
@@ -24,12 +24,12 @@ export default {
   name: "Timer",
   computed: {
     timerText() {
-      if (this.timer.active) return "STOP";
+      if (this.timer.Active) return "STOP";
 
       return "START";
     },
     timerTime() {
-      return Math.round(this.timer.time * 100) / 100;
+      return Math.round((this.timer.TotalTime/60) * 100) / 100;
     },
   },
   props: {
@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     toggleTimer() {
-      if (this.timer.active) {
+      if (this.timer.Active) {
         this.$emit("stop-timer");
         return;
       }

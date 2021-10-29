@@ -88,15 +88,17 @@ export default {
         return;
       }
       try {
-        let response = await axios.post("/api/users/register", {
+        let response = await axios.post("/api/user/register", {
           firstName: this.firstName,
           lastName: this.lastName,
           username: this.username,
           password: this.password,
         });
-        console.log(response);
-        this.$root.$data.user = response.data.user;
-        this.$router.push({ name: "Home" });
+        console.log(response.data);
+        this.usernameLogin = this.username;
+        this.passwordLogin = this.password;
+        this.$root.$data.user = null;
+        await this.login();
       } catch (error) {
         this.error = error.response.data.message;
         this.$root.$data.user = null;
@@ -105,7 +107,7 @@ export default {
     async login() {
       if (!this.usernameLogin || !this.passwordLogin) return;
       try {
-        let response = await axios.post("/api/users/login", {
+        let response = await axios.post("/api/user/login", {
           username: this.usernameLogin,
           password: this.passwordLogin,
         });
