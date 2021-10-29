@@ -70,11 +70,13 @@ app.delete("/api/projects/:projectId", async (req, res) => {
 app.post('/api/projects/:projectID/timers', async (req, res) => {
   var sql = "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
     con.query(sql)[req.params.projectID, req.body.title],
-      function(error, results){
+      function(err, results){
         if (err) {
           res.sendStatus(500);
           throw err;
         }
+        res.sendStatus(200);
+        res.send(results)
       };
     });
 
@@ -88,6 +90,8 @@ app.get("/api/projects/:projectID/timers", async (req, res) => {
         res.sendStatus(500);
         throw(error);
       }
+      res.sendStatus(200);
+      res.send(result)
     });
   
     
@@ -113,22 +117,31 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
 //update a task's TotalTime
 app.put("/api/tasks/:id", async (req, res) => {
   var sql = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
-  try {
+
     con.query(sql)[(req.body.TotalTime, req.body.TaskID)],
-      function (error, results) {};
-  } catch (err) {
-    console.error("Error while updating TotalTime", err.message);
-  }
+      function (err, results) {
+        if (err) {
+          res.sendStatus(500);
+          console.log("Error while updating TotalTime");
+          throw err;
+        }
+        res.sendStatus(200);
+        res.send(results);
+      };
 });
 
 //delete a task
 app.delete("/api/tasks/:id", async (req, res) => {
   var sql = "DELETE FROM Task WHERE TaskID = ?;";
-  try {
-    con.query(sql)[req.body.TaskID], function (error, results) {};
-  } catch (err) {
-    console.error("Error while deleting task", err.message);
-  }
+    con.query(sql)[req.body.TaskID], function (err, results) {
+      if (err) {
+        res.sendStatus(500);
+        console.log("Error while deleting task");
+        throw err;
+      }
+      res.sendStatus(200);
+      res.send(results);
+    };
 });
 
 //Time API
@@ -149,8 +162,13 @@ app.post("/api/user/register", async (req, res) => {
       req.body.password,
     ],
     function (err, result) {
-      if (err) throw err;
-      console.log(result);
+      if (err) {
+        res.sendStatus(500);
+        console.log("Error while registering user");
+        throw err;
+      }
+      res.sendStatus(200);
+      res.send(result);
       console.log("1 user inserted");
     }
   );
@@ -168,8 +186,13 @@ app.get("/api/user/login", async (req, res) => {
     sql,
     [req.body.username, req.body.password],
     function (err, result) {
-      if (err) throw err;
-      console.log(result);
+      if (err) {
+        res.sendStatus(500);
+        console.log("Error while logging in a user");
+        throw err;
+      }
+      res.sendStatus(200);
+      res.send(result);
       console.log("valid user found");
     }
   );
