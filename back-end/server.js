@@ -88,6 +88,7 @@ app.get("/api/projects/:projectID/timers", async (req, res) => {
         throw(error);
       }
     });
+});
 
 //Stop timer
 app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
