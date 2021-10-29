@@ -41,7 +41,7 @@ app.get("/api/projects", async (req, res) => {
 
 //Delete the project
 app.delete("/api/projects/:projectId", async (req, res) => {
-  var sql = "DELETE * FROM Project WHERE ProjectID = ?";
+  var sql = "DELETE * FROM Project WHERE ProjectID = ?;";
   con.query(sql, [req.params.projectId], function (err, result) {
     if (err) throw err;
     console.log("Record deleted");
@@ -51,10 +51,10 @@ app.delete("/api/projects/:projectId", async (req, res) => {
 //Task API
 //add a task
 app.post('/api/projects/:projectID/timers', async (req, res) => {
-  var sql = "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
+  var sql = "INSERT INTO Task (ProjectID, TaskName) VALUES (?, ?);";
     try {
-    con.query(sql)[req.params.projectID, req.body.title],
-      function(error, results){};
+    con.query(sql, [req.params.projectID, req.body.title],
+      function(error, results){});
     } catch (err) {
       console.error(`Error while creating task`, err.message);
       next(err);
@@ -65,7 +65,7 @@ app.post('/api/projects/:projectID/timers', async (req, res) => {
 app.get("/api/projects/:projectID/timers", async (req, res) => {
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
   try {
-    con.query(sql)[req.params.projectID], function (error, results) {};
+    con.query(sql[req.params.projectID], function (error, results) {});
   } catch (err) {
     console.error("Error while getting tasks for project", err.message);
     next(err);
@@ -73,28 +73,37 @@ app.get("/api/projects/:projectID/timers", async (req, res) => {
 });
 
 //update a task's TotalTime
-app.put('/api/tasks/:id', async (req, res) => {
-  var sql = 'UPDATE Task SET TotalTime = ? WHERE TaskID = ?';
-  try {
-    con.query(sql)[
-      req.body.TotalTime, req.body.TaskID
-    ], function(error, results){};
-  } catch (err) {
-    console.error('Error while updating TotalTime', err.message);
-  }
+// app.put('/api/tasks/:id', async (req, res) => {
+//   var sql = 'UPDATE Task SET TotalTime = ? WHERE TaskID = ?';
+//   try {
+//     con.query(sql[
+//       req.body.TotalTime, req.body.TaskID
+//     ], function(error, results){});
+//   } catch (err) {
+//     console.error('Error while updating TotalTime', err.message);
+//   }
+// });
+
+//start a task's timer
+app.put("/api/projects/:projectID/timers/:timerID/start", async (req, res) => {
+  var sql = "UPDATE Timer SET LastEdited = ? WHERE TaskID = ?;";
+  con.query(sql, [Date.now(), req.body.timerName], function (err, result) {
+    if (err) throw err;
+    console.log("All records selected");
+  });  
 });
 
 //delete a task
-app.delete("/api/tasks/:id", async (req, res) => {
+app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
   var sql = "DELETE FROM Task WHERE TaskID = ?;";
   try {
-    con.query(sql)[req.body.TaskID], function (error, results) {};
+    con.query(sql[req.body.timerName], function (error, results) {});
   } catch (err) {
     console.error("Error while deleting task", err.message);
   }
 });
 
-//Time API
+//Time API - implement post MVP 
 
 //User API
     //Register a User
