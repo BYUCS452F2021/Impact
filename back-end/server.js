@@ -65,10 +65,10 @@ app.post("/api/projects/:projectID/timers", async (req, res) => {
 });
 
 //get all tasks for a project
-app.get("api/projects/:id/tasks", async (req, res) => {
+app.get("/api/projects/:projectID/timers", async (req, res) => {
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
   try {
-    con.query(sql)[req.body.ProjectID], function (error, results) {};
+    con.query(sql)[req.params.projectID], function (error, results) {};
   } catch (err) {
     console.error("Error while getting tasks for project", err.message);
     next(err);
@@ -134,6 +134,8 @@ app.delete("/api/tasks/:id", async (req, res) => {
 //Time API
 
 //User API
+//Register a User
+
 app.post("/api/user/register", async (req, res) => {
   var sql =
     "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
@@ -155,38 +157,22 @@ app.post("/api/user/register", async (req, res) => {
 });
 
 // login a user
-app.post("/api/companies/login", async (req, res) => {
+app.get("/api/user/login", async (req, res) => {
   // Make sure that the form coming from the browser includes a username and a
   // password, otherwise return an error.
   if (!req.body.username || !req.body.password) return res.sendStatus(400);
 
-  try {
-    //  lookup user record
-    const company = await Company.findOne({
-      username: req.body.username,
-    });
-    // Return an error if user does not exist.
-    if (!company)
-      return res.status(403).send({
-        message: "username or password is wrong",
-      });
-
-    // Return the SAME error if the password is wrong. This ensure we don't
-    // leak any information about which users exist.
-    if (!(await company.comparePassword(req.body.password)))
-      return res.status(403).send({
-        message: "username or password is wrong",
-      });
-
-    // set user session info
-    req.session.companyID = company._id;
-    return res.send({
-      company: company,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.sendStatus(500);
-  }
+  var sql = "SELECT * FROM User WHERE UserName = ? AND Password = ?;";
+  console.log(req.body);
+  con.query(
+    sql,
+    [req.body.username, req.body.password],
+    function (err, result) {
+      if (err) throw err;
+      console.log(result);
+      console.log("valid user found");
+    }
+  );
 });
 
 // // PROJECT API
