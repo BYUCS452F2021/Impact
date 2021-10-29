@@ -11,7 +11,7 @@ app.use(
 );
 
 var con = mysql.createConnection({
-  host: "localhost",
+  host: "127.0.0.1",
   user: "root",
   password: "password",
   database: "impact",
@@ -25,27 +25,33 @@ con.connect(function (err) {
 //Project API
 //Add a project
 app.post("/api/projects", async (req, res) => {
+  console.log("post /api/projects hit");
   var sql = "INSERT INTO Project (UserID, ProjectName) VALUES (?, ?);";
-  con.query(sql, [req.userId, req.title], function (err, result) {
+
+  con.query(sql, [req.body.userId, req.body.title], function (err, result) {
     if (err)  {
       res.sendStatus(500);
       throw err;
     }
     console.log("1 record inserted");
-    res.sendStatus(200);
+    // res.sendStatus(200);
     res.send(result);
   });
 });
 
 //Get all project
-app.get("/api/projects", async (req, res) => {
-  var sql = "SELECT * FROM Project;";
-  con.query(sql, function (err, result) {
+app.get("/api/projects/:userId", async (req, res) => {
+  console.log("get /api/projects/:userId hit");
+
+  var sql = "SELECT * FROM Project WHERE UserID = ?;";
+  con.query(sql, [req.params.userId], function (err, result) {
     if (err)  {
       sendStatus(500);
       throw err;
     }
-    res.sendStatus(200);
+    // res.sendStatus(200);
+    result=JSON.parse(JSON.stringify(result));
+    console.log(result);
     res.send(result)
     console.log("All records selected");
   });
@@ -53,35 +59,48 @@ app.get("/api/projects", async (req, res) => {
 
 //Delete the project
 app.delete("/api/projects/:projectId", async (req, res) => {
-  var sql = "DELETE * FROM Project WHERE ProjectID = ?;";
+  console.log("delete /api/projects/:projectID hit");
+
+  var sql = "DELETE FROM Task WHERE ProjectID = ?;";
   con.query(sql, [req.params.projectId], function (err, result) {
     if (err) {
       res.sendStatus(500);
       throw err;
     }
-    console.log("Record deleted");
-    res.sendStatus(200);
-    res.send(result);
+    var sql = "DELETE FROM Project WHERE ProjectID = ?;";
+    con.query(sql, [req.params.projectId], function(err, result) {
+      if (err) {
+        res.sendStatus(500);
+        throw err;
+      }
+      res.send(result);
+    });
   });
 });
 
 //Task API
 //add a task
 app.post('/api/projects/:projectID/timers', async (req, res) => {
+  console.log("post /api/projects/:projectID/timers hit");
+  console.log(req.params.projectID);
+  console.log(req.body.title);
   var sql = "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
-    con.query(sql)[req.params.projectID, req.body.title],
+    con.query(sql, [req.params.projectID, req.body.title, 0],
       function(err, results){
         if (err) {
           res.sendStatus(500);
           throw err;
         }
-        res.sendStatus(200);
+        // res.sendStatus(200);
         res.send(results)
-      };
+      });
     });
 
 //get all tasks for a project
 app.get("/api/projects/:projectID/timers", async (req, res) => {
+  console.log("get /api/projects/:projectID/timers hit");
+  console.log(req.params.projectID);
+
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
     con.query(sql, [req.params.projectID], function (error, results) {
       if (error) {
@@ -89,13 +108,58 @@ app.get("/api/projects/:projectID/timers", async (req, res) => {
         res.sendStatus(500);
         throw(error);
       }
-      res.sendStatus(200);
-      res.send(result)
+      // res.sendStatus(200);
+      results=JSON.parse(JSON.stringify(results));
+      console.log(results);
+      res.send(results)
     });
 });
 
+
+// start timer
+app.put("/api/projects/:projectID/timers/:timerID/start", async (req, res) => {
+  console.log("put /api/projects/:projectID/timers/:timerID/start hit");
+
+  var sqlSelect = "SELECT * FROM Task WHERE TaskID = ?";
+  con.query(sqlSelect, [req.params.timerID], function (err, result) {
+    if (err) {
+      res.sendStatus(500);
+      throw err;
+    }
+    console.log("Timer started");
+    let task = result;
+    console.log(Date(task.LastEdited));
+    task.LastEdited = Date.now(); // /1000 because this is milliseconds mysql needs seconds
+    var sqlUpdateTime = "UPDATE Task SET Active = true WHERE TaskID = ?";
+    console.log(task.TaskID);
+    con.query(sqlUpdateTime, [req.params.timerID], function (err, result) {
+      if (err) {
+        res.sendStatus(500);
+        throw err;
+      }
+      console.log(result);
+      console.log("Time updated");
+      console.log("about to update lastedited");
+      var sqlUpdateLastEdited = "UPDATE Task SET LastEdited = NOW() WHERE TaskId = ?";
+      con.query(sqlUpdateLastEdited, [req.params.timerID], function (err, result) {
+        if (err) {
+          res.sendStatus(500);
+          throw err;
+        }
+        console.log(result);
+
+        console.log("LastEdited updated");
+        res.sendStatus(200);
+
+      });
+    });
+    
+  });
+});
 //Stop timer
 app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
+  console.log("put /api/projects/:projectID/timers/:timerID/sto hit");
+
   var sqlSelect = "SELECT * FROM Task WHERE TaskID = ?";
   con.query(sqlSelect, [req.params.timerID], function (err, result) {
     if (err) {
@@ -103,58 +167,64 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
       throw err;
     }
     console.log("Timer stopped");
-    let task = result;
-    task.TotalTime =
-      task.TotalTime + (Date.now() / 1000 / 60 - task.LastEdited / 1000 / 60);
-    task.LastEdited = Date.now();
-    var sqlUpdateTime = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
-    con.query(sqlUpdateTime, [task.TotalTime, task.TaskID], function (err, result) {
+    result=JSON.parse(JSON.stringify(result));
+    console.log(result);
+    let task = result[0];
+    console.log(task);
+    console.log(new Date(task.LastEdited).getTime());
+    var sqlUpdateTime = "UPDATE Task SET Active = false WHERE TaskID = ?";
+    console.log(task.TaskID);
+    con.query(sqlUpdateTime, [req.params.timerID], function (err, result) {
       if (err) {
         res.sendStatus(500);
         throw err;
       }
-      console.log("Time updated");
+      task.TotalTime =
+      task.TotalTime + (Math.floor(((Date.now() - (new Date(task.LastEdited).getTime()))/1000)));
+      task.LastEdited = Date.now();
+      var sqlUpdateTime = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
+      con.query(sqlUpdateTime, [task.TotalTime, task.TaskID], function (err, result) {
+        if (err) {
+          res.sendStatus(500);
+          throw err;
+        }
+        console.log("Time updated");
+        res.sendStatus(200);
+      });
     });
-    var sqlUpdateLastEdited = "UPDATE Task SET LastEdited = ? WHERE TaskId = ?";
-    con.query(sqlUpdateLastEdited, [task.LastEdited, task.TaskID], function (err, result) {
-      if (err) {
-        res.sendStatus(500);
-        throw err;
-      }
-      console.log("LastEdited updated");
-    });
-    res.sendStatus(200);
   });
 });
 
 //update a task's TotalTime
-app.put("/api/tasks/:id", async (req, res) => {
-  var sql = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
+// app.put("/api/tasks/:id", async (req, res) => {
+//   console.log("put /api/tasks/:id hit");
 
-    con.query(sql)[(req.body.TotalTime, req.body.TaskID)],
-      function (err, results) {
-        if (err) {
-          res.sendStatus(500);
-          console.log("Error while updating TotalTime");
-          throw err;
-        }
-        res.sendStatus(200);
-        res.send(results);
-      };
-});
+//   var sql = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
+
+//     con.query(sql)[(req.body.TotalTime, req.body.TaskID)],
+//       function (err, results) {
+//         if (err) {
+//           res.sendStatus(500);
+//           console.log("Error while updating TotalTime");
+//           throw err;
+//         }
+//         // res.sendStatus(200);
+//         res.send(results);
+//       };
+// });
 
 //delete a task
 app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
+  console.log("delete /api/projects/:projectID/timers/:timerID hit");
+
   var sql = "DELETE FROM Task WHERE TaskID = ?;";
-    con.query(sql)[req.body.TaskID], function (err, results) {
-      if (err) {
-        res.sendStatus(500);
-        console.log("Error while deleting task");
-        throw err;
-      }
-      res.sendStatus(200);
-      res.send(results);
-    };
+  con.query(sql, [req.params.timerID], function (err, result) {
+    if (err) {
+      res.sendStatus(500);
+      throw err;
+    }
+    res.send(result);
+  });
 });
 
 //Time API - implement post MVP 
@@ -163,6 +233,8 @@ app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
 //Register a User
 
 app.post("/api/user/register", async (req, res) => {
+  console.log("post /api/user/register hit");
+
   var sql =
     "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
   console.log(req.body);
@@ -180,15 +252,19 @@ app.post("/api/user/register", async (req, res) => {
         console.log("Error while registering user");
         throw err;
       }
-      res.sendStatus(200);
-      res.send(result);
-      console.log("1 user inserted");
+      // res.sendStatus(200);
+      console.log(result);
+      result=JSON.parse(JSON.stringify(result));
+      console.log(result);
+      console.log({user: result});
+      res.send({user: result});
+
     }
   );
 });
 
 // login a user
-app.get("/api/user/login", async (req, res) => {
+app.post("/api/user/login", async (req, res) => {
   // Make sure that the form coming from the browser includes a username and a
   // password, otherwise return an error.
   if (!req.body.username || !req.body.password) return res.sendStatus(400);
@@ -203,10 +279,14 @@ app.get("/api/user/login", async (req, res) => {
         res.sendStatus(500);
         console.log("Error while logging in a user");
         throw err;
+      } else {
+        console.log('success finding user for login, trying to send result');
+        // res.sendStatus(200);
+        result=JSON.parse(JSON.stringify(result));
+        console.log({user: result[0]});
+        res.send({user: result[0]});
+        console.log("valid user found");
       }
-      res.sendStatus(200);
-      res.send(result);
-      console.log("valid user found");
     }
   );
 });

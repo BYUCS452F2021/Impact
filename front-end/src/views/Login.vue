@@ -94,9 +94,11 @@ export default {
           username: this.username,
           password: this.password,
         });
-        console.log(response);
-        this.$root.$data.user = response.data.user;
-        this.$router.push({ name: "Home" });
+        console.log(response.data);
+        this.usernameLogin = this.username;
+        this.passwordLogin = this.password;
+        this.$root.$data.user = null;
+        await this.login();
       } catch (error) {
         this.error = error.response.data.message;
         this.$root.$data.user = null;

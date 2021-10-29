@@ -1,7 +1,7 @@
 <template>
   <div class="project">
     <div class="title-bar">
-      <h1 class="project-title">{{ this.project.title }}</h1>
+      <h1 class="project-title">{{ this.project.ProjectName }}</h1>
       <p class="remove-project" v-on:click="$emit('delete-project')">-</p>
     </div>
     <Timer
@@ -49,7 +49,7 @@ export default {
     async addTimer() {
       if (this.timerName.length != 0) {
         try {
-          await axios.post(`/api/projects/${this.project._id}/timers`, {
+          await axios.post(`/api/projects/${this.project.ProjectID}/timers`, {
             title: this.timerName,
           });
           this.timerName = "";
@@ -63,7 +63,7 @@ export default {
     async getTimers() {
       try {
         const response = await axios.get(
-          `/api/projects/${this.project._id}/timers`
+          `/api/projects/${this.project.ProjectID}/timers`
         );
         this.timers = response.data;
       } catch (error) {
@@ -73,7 +73,7 @@ export default {
     async startTimer(timer) {
       try {
         await axios.put(
-          `/api/projects/${this.project._id}/timers/${timer._id}/start`,
+          `/api/projects/${this.project.ProjectID}/timers/${timer.TaskID}/start`,
           {}
         );
         await this.getTimers();
@@ -84,7 +84,7 @@ export default {
     async stopTimer(timer) {
       try {
         await axios.put(
-          `/api/projects/${this.project._id}/timers/${timer._id}/stop`,
+          `/api/projects/${this.project.ProjectID}/timers/${timer.TaskID}/stop`,
           {}
         );
         await this.getTimers();
@@ -95,7 +95,7 @@ export default {
     async deleteTimer(timer) {
       try {
         await axios.delete(
-          `/api/projects/${this.project._id}/timers/${timer._id}`
+          `/api/projects/${this.project.ProjectID}/timers/${timer.TaskID}`
         );
         await this.getTimers();
       } catch (error) {
