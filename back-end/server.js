@@ -50,16 +50,15 @@ app.delete("/api/projects/:projectId", async (req, res) => {
 
 //Task API
 //add a task
-app.post("/api/tasks", async (req, res) => {
-  var sql =
-    "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
-  try {
-    con.query(sql)[(req.body.ProjectID, req.body.TaskName, req.body.TotalTime)],
-      function (error, results) {};
-  } catch (err) {
-    console.error(`Error while creating task`, err.message);
-    next(err);
-  }
+app.post('/api/projects/:projectID/timers', async (req, res) => {
+  var sql = "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
+    try {
+    con.query(sql)[req.params.projectID, req.body.title],
+      function(error, results){};
+    } catch (err) {
+      console.error(`Error while creating task`, err.message);
+      next(err);
+    }
 });
 
 //get all tasks for a project
@@ -70,6 +69,18 @@ app.get("api/projects/:id/tasks", async (req, res) => {
   } catch (err) {
     console.error("Error while getting tasks for project", err.message);
     next(err);
+  }
+});
+
+//update a task's TotalTime
+app.put('/api/tasks/:id', async (req, res) => {
+  var sql = 'UPDATE Task SET TotalTime = ? WHERE TaskID = ?';
+  try {
+    con.query(sql)[
+      req.body.TotalTime, req.body.TaskID
+    ], function(error, results){};
+  } catch (err) {
+    console.error('Error while updating TotalTime', err.message);
   }
 });
 
@@ -101,26 +112,7 @@ app.post('/api/user/register', async (req, res) => {
     console.log(result);
     console.log("1 user inserted");
   });
-app.post("/api/user/register", async (req, res) => {
-  var sql =
-    "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
-  con.query(
-    sql,
-    [
-      req.body.firstName,
-      req.body.lastName,
-      req.body.username,
-      req.body.password,
-    ],
-    function (err, result) {
-      if (err) throw err;
-      console.log("1 user inserted")
-      res.sendStatus(500);
-    }
-  );
-  res.sendStatus(200);
 });
-
 
 // login a user
 app.get('/api/user/login', async (req, res) => {
@@ -128,8 +120,16 @@ app.get('/api/user/login', async (req, res) => {
   // password, otherwise return an error.
   if (!req.body.username || !req.body.password) return res.sendStatus(400);
 
-  var sql = ""
-  
+  var sql = "SELECT * FROM User WHERE UserName = ? AND Password = ?;";
+  console.log(req.body);
+  con.query(sql, [
+    req.body.username,
+    req.body.password
+  ], function (err, result) {
+    if (err) throw err;
+    console.log(result);
+    console.log("valid user found");
+  });
 });
 
 // // PROJECT API
