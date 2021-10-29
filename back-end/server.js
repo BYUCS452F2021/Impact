@@ -4,9 +4,11 @@ const mysql = require("mysql");
 const app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+app.use(
+  bodyParser.urlencoded({
+    extended: false,
+  })
+);
 
 var con = mysql.createConnection({
   host: "localhost",
@@ -86,24 +88,10 @@ app.delete("/api/tasks/:id", async (req, res) => {
 //Time API
 
 //User API
-<<<<<<< HEAD
-app.post('/api/user/register', async (req, res) => {
-  var sql = "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
-  console.log(req.body);
-  con.query(sql, [
-    req.body.firstName,
-    req.body.lastName,
-    req.body.username,
-    req.body.password
-  ], function (err, result) {
-    if (err) throw err;
-    console.log(result);
-    console.log("1 user inserted");
-  });
-=======
 app.post("/api/user/register", async (req, res) => {
   var sql =
     "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
+  console.log(req.body);
   con.query(
     sql,
     [
@@ -114,10 +102,10 @@ app.post("/api/user/register", async (req, res) => {
     ],
     function (err, result) {
       if (err) throw err;
+      console.log(result);
       console.log("1 user inserted");
     }
   );
->>>>>>> 3c8fce31a82eedade9c228a19a14d88ac61924c6
 });
 
 // login a user
