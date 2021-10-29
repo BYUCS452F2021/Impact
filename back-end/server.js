@@ -70,7 +70,7 @@ app.delete('/api/tasks/:id', async (req, res) => {
 //Time API
 
 //User API
-app.post('/api/users/register', async (req, res) => {
+app.post('/api/user/register', async (req, res) => {
   var sql = "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
   con.query(sql, [
     req.body.firstName,
