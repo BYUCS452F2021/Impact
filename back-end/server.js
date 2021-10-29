@@ -1,20 +1,35 @@
-const express = require('express');
-const mysql = require('mysql');
+const express = require("express");
+const mysql = require("mysql");
 const app = express();
 
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "password",
-  database: "impact"
+  database: "impact",
 });
 
-con.connect(function(err) {
+con.connect(function (err) {
   if (err) throw err;
   console.log("Connected!");
 });
 
 //Project API
+app.post("/api/projects", async (req, res) => {
+  var sql = "INSERT INTO Project (UserID, ProjectName) VALUES (?, ?);";
+  con.query(sql, [req.userId, req.title], function (err, result) {
+    if (err) throw err;
+    console.log("1 record inserted");
+  });
+});
+
+app.get("/api/projects", async (req, res) => {
+  var sql = "SELECT * FROM Project;";
+  con.query(sql, function (err, result) {
+    if (err) throw err;
+    console.log("All records selected");
+  });
+});
 
 //Task API
 //add a task
@@ -55,6 +70,84 @@ app.delete('/api/tasks/:id', async (req, res) => {
 //Time API
 
 //User API
+
+// Register a user
+app.post('/api/user/register', async (req, res) => {
+  // Make sure that the form coming from the browser includes a username and a
+  // passsword, otherwise return an error. A 400 error means the request was
+  // malformed.
+  console.log("register hit");
+  if (!req.body.username || !req.body.password || !req.body.firstName || !req.body.lastName)
+    return res.status(400).send({
+      message: "firstName, lastName, username and password are required"
+    });
+
+  try {
+
+    //  Check to see if username already exists and if not send a 403 error. A 403
+    // error means permission denied.
+    const existingCompany = await Company.findOne({
+      username: req.body.username
+    });
+    if (existingCompany)
+      return res.status(403).send({
+        message: "username already exists"
+      });
+
+    // create a new user and save it to the database
+    const company = new Company({
+      companyName: req.body.companyName,
+      username: req.body.username,
+      password: req.body.password
+    });
+    await company.save();
+    // set user session info
+    req.session.companyID = company._id;
+    // send back a 200 OK response, along with the user that was created
+    return res.send({
+      company: company
+    });
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(500);
+  }
+});
+
+// login a user
+app.post('/api/companies/login', async (req, res) => {
+  // Make sure that the form coming from the browser includes a username and a
+  // password, otherwise return an error.
+  if (!req.body.username || !req.body.password)
+    return res.sendStatus(400);
+
+  try {
+    //  lookup user record
+    const company = await Company.findOne({
+      username: req.body.username
+    });
+    // Return an error if user does not exist.
+    if (!company)
+      return res.status(403).send({
+        message: "username or password is wrong"
+      });
+
+    // Return the SAME error if the password is wrong. This ensure we don't
+    // leak any information about which users exist.
+    if (!await company.comparePassword(req.body.password))
+      return res.status(403).send({
+        message: "username or password is wrong"
+      });
+
+    // set user session info
+    req.session.companyID = company._id;
+    return res.send({
+      company: company
+    });
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(500);
+  }
+});
 
 // // PROJECT API
 // app.post('/api/projects', async (req, res) => {
@@ -197,4 +290,4 @@ app.delete('/api/tasks/:id', async (req, res) => {
 //   }
 // });
 
-app.listen(3000, () => console.log('Server listening on port 3000!'));
+app.listen(3000, () => console.log("Server listening on port 3000!"));
