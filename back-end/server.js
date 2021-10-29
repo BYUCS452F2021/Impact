@@ -1,6 +1,12 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 const mysql = require("mysql");
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 
 var con = mysql.createConnection({
   host: "localhost",
@@ -70,8 +76,9 @@ app.delete('/api/tasks/:id', async (req, res) => {
 //Time API
 
 //User API
-app.post('/api/users/register', async (req, res) => {
+app.post('/api/user/register', async (req, res) => {
   var sql = "INSERT INTO User (FirstName, LastName, UserName, Password) VALUES (?, ?, ?, ?);";
+  console.log(req.body);
   con.query(sql, [
     req.body.firstName,
     req.body.lastName,
@@ -79,6 +86,7 @@ app.post('/api/users/register', async (req, res) => {
     req.body.password
   ], function (err, result) {
     if (err) throw err;
+    console.log(result);
     console.log("1 user inserted");
   });
 });
