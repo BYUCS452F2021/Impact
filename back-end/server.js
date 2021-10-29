@@ -52,11 +52,11 @@ app.delete("/api/projects/:projectId", async (req, res) => {
 
 //Task API
 //add a task
-app.post("/api/tasks", async (req, res) => {
+app.post("/api/projects/:projectID/timers", async (req, res) => {
   var sql =
     "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
   try {
-    con.query(sql)[(req.body.ProjectID, req.body.TaskName, req.body.TotalTime)],
+    con.query(sql)[(req.params.projectID, req.body.title)],
       function (error, results) {};
   } catch (err) {
     console.error(`Error while creating task`, err.message);
@@ -72,6 +72,52 @@ app.get("api/projects/:id/tasks", async (req, res) => {
   } catch (err) {
     console.error("Error while getting tasks for project", err.message);
     next(err);
+  }
+});
+
+//Stop timer
+
+// app.put('/api/projects/:projectID/timers/:timerID/stop', async (req, res) => {
+//   try {
+//     let timer = await Timer.findOne({_id:req.params.timerID, project: req.params.projectID});
+//     if (!timer) {
+//       res.send(404);
+//       return;
+//     }
+//     timer.time = timer.time + ((Date.now() / 1000 / 60) - (timer.lastEdited / 1000 / 60));
+//     timer.active = false;
+//     timer.lastEdited = Date.now();
+//     await timer.save();
+//     res.sendStatus(200);
+//   } catch (error) {
+//     console.log(error);
+//     res.sendStatus(500);
+//   }
+// });
+
+app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
+  var sqlSelect = "SELECT * FROM Task WHERE TaskID = ?";
+  con.query(sqlSelect, [req.params.timerID], function (err, result) {
+    if (err) {
+      res.sendStatus(500);
+      throw err;
+    }
+    console.log("Timer stopped");
+    let task = result;
+    task.TotalTime =
+      task.TotalTime + (Date.now() / 1000 / 60 - timer.lastEdited / 1000 / 60);
+    res.sendStatus(200);
+  });
+});
+
+//update a task's TotalTime
+app.put("/api/tasks/:id", async (req, res) => {
+  var sql = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
+  try {
+    con.query(sql)[(req.body.TotalTime, req.body.TaskID)],
+      function (error, results) {};
+  } catch (err) {
+    console.error("Error while updating TotalTime", err.message);
   }
 });
 
