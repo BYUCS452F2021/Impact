@@ -123,18 +123,6 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
   });
 });
 
-//update a task's TotalTime
-// app.put('/api/tasks/:id', async (req, res) => {
-//   var sql = 'UPDATE Task SET TotalTime = ? WHERE TaskID = ?';
-//   try {
-//     con.query(sql[
-//       req.body.TotalTime, req.body.TaskID
-//     ], function(error, results){});
-//   } catch (err) {
-//     console.error('Error while updating TotalTime', err.message);
-//   }
-// });
-
 //start a task's timer
 app.put("/api/projects/:projectID/timers/:timerID/start", async (req, res) => {
   var sql = "UPDATE Timer SET LastEdited = ? WHERE TaskID = ?;";
