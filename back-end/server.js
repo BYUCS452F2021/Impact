@@ -67,34 +67,20 @@ app.post("/api/projects/:projectID/timers", async (req, res) => {
 //get all tasks for a project
 app.get("/api/projects/:projectID/timers", async (req, res) => {
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
-  try {
-    con.query(sql)[req.params.projectID], function (error, results) {};
-  } catch (err) {
-    console.error("Error while getting tasks for project", err.message);
-    next(err);
+ 
+    con.query(sql, [req.params.projectID], function (error, results) {
+      if (error) {
+        console.error("Error while getting tasks for project", err.message);
+        res.sendStatus(500);
+        throw(error);
+      }
+    });
+  
+    
   }
 });
 
 //Stop timer
-
-// app.put('/api/projects/:projectID/timers/:timerID/stop', async (req, res) => {
-//   try {
-//     let timer = await Timer.findOne({_id:req.params.timerID, project: req.params.projectID});
-//     if (!timer) {
-//       res.send(404);
-//       return;
-//     }
-//     timer.time = timer.time + ((Date.now() / 1000 / 60) - (timer.lastEdited / 1000 / 60));
-//     timer.active = false;
-//     timer.lastEdited = Date.now();
-//     await timer.save();
-//     res.sendStatus(200);
-//   } catch (error) {
-//     console.log(error);
-//     res.sendStatus(500);
-//   }
-// });
-
 app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
   var sqlSelect = "SELECT * FROM Task WHERE TaskID = ?";
   con.query(sqlSelect, [req.params.timerID], function (err, result) {
