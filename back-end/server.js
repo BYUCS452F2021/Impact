@@ -25,8 +25,13 @@ con.connect(function (err) {
 app.post("/api/projects", async (req, res) => {
   var sql = "INSERT INTO Project (UserID, ProjectName) VALUES (?, ?);";
   con.query(sql, [req.userId, req.title], function (err, result) {
-    if (err) throw err;
+    if (err)  {
+      res.sendStatus(500);
+      throw err;
+    }
     console.log("1 record inserted");
+    res.sendStatus(200);
+    res.send(result);
   });
 });
 
@@ -34,7 +39,12 @@ app.post("/api/projects", async (req, res) => {
 app.get("/api/projects", async (req, res) => {
   var sql = "SELECT * FROM Project;";
   con.query(sql, function (err, result) {
-    if (err) throw err;
+    if (err)  {
+      sendStatus(500);
+      throw err;
+    }
+    res.sendStatus(200);
+    res.send(result)
     console.log("All records selected");
   });
 });
@@ -43,8 +53,13 @@ app.get("/api/projects", async (req, res) => {
 app.delete("/api/projects/:projectId", async (req, res) => {
   var sql = "DELETE * FROM Project WHERE ProjectID = ?";
   con.query(sql, [req.params.projectId], function (err, result) {
-    if (err) throw err;
+    if (err) {
+      res.sendStatus(500);
+      throw err;
+    }
     console.log("Record deleted");
+    res.sendStatus(200);
+    res.send(result);
   });
 });
 
@@ -52,14 +67,14 @@ app.delete("/api/projects/:projectId", async (req, res) => {
 //add a task
 app.post('/api/projects/:projectID/timers', async (req, res) => {
   var sql = "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
-    try {
     con.query(sql)[req.params.projectID, req.body.title],
-      function(error, results){};
-    } catch (err) {
-      console.error(`Error while creating task`, err.message);
-      next(err);
-    }
-});
+      function(error, results){
+        if (err) {
+          res.sendStatus(500);
+          throw err;
+        }
+      };
+    });
 
 //get all tasks for a project
 app.get("api/projects/:id/tasks", async (req, res) => {
