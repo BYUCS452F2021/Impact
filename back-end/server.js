@@ -91,7 +91,24 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
     console.log("Timer stopped");
     let task = result;
     task.TotalTime =
-      task.TotalTime + (Date.now() / 1000 / 60 - timer.lastEdited / 1000 / 60);
+      task.TotalTime + (Date.now() / 1000 / 60 - task.LastEdited / 1000 / 60);
+    task.LastEdited = Date.now();
+    var sqlUpdateTime = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
+    con.query(sqlUpdateTime, [task.TotalTime, task.TaskID], function (err, result) {
+      if (err) {
+        res.sendStatus(500);
+        throw err;
+      }
+      console.log("Time updated");
+    });
+    var sqlUpdateLastEdited = "UPDATE Task SET LastEdited = ? WHERE TaskId = ?";
+    con.query(sqlUpdateLastEdited, [task.LastEdited, task.TaskID], function (err, result) {
+      if (err) {
+        res.sendStatus(500);
+        throw err;
+      }
+      console.log("LastEdited updated");
+    });
     res.sendStatus(200);
   });
 });
