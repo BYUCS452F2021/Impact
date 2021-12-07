@@ -16,6 +16,38 @@ mongoose.connect("mongodb://localhost:27017/impact", {
   useUnifiedTopology: true,
 });
 
+const taskSchema = new mongoose.Schema({
+  TaskName: String,
+  TotalTime: Number,
+  Active: Boolean,
+  LastEdited: Date
+});
+
+const Task = mongoose.model('Task', taskSchema);
+
+const projectSchema = new mongoose.Schema({
+  ProjectName: String,
+  Tasks: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'Task'
+  }]
+});
+
+const Project = mongoose.model('Project', projectSchema);
+
+const userSchema = new mongoose.Schema({
+  Projects: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'Project'
+  }],
+  FirstName: String,
+  LastName: String,
+  UserName: String,
+  Password: String
+});
+
+const User = mongoose.model('User', userSchema);
+
 //Project API
 //Add a project
 app.post("/api/projects", async (req, res) => {
