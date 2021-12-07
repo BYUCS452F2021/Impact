@@ -21,26 +21,30 @@ const taskSchema = new mongoose.Schema({
   TaskName: String,
   TotalTime: Number,
   Active: Boolean,
-  LastEdited: Date
+  LastEdited: Date,
 });
 const Task = mongoose.model("Task", taskSchema);
 const projectSchema = new mongoose.Schema({
   ProjectName: String,
-  Tasks: [{
-    type: mongoose.Schema.ObjectId,
-    ref: 'Task'
-  }]
+  Tasks: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Task",
+    },
+  ],
 });
 const Project = mongoose.model("Project", projectSchema);
 const userSchema = new mongoose.Schema({
-  Projects: [{
-    type: mongoose.Schema.ObjectId,
-    ref: 'Project'
-  }],
+  Projects: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Project",
+    },
+  ],
   FirstName: String,
   LastName: String,
   UserName: String,
-  Password: String
+  Password: String,
 });
 
 // This is a hook that will be called before a user record is saved,
@@ -89,20 +93,34 @@ userSchema.methods.toJSON = function () {
 
 const User = mongoose.model("User", userSchema);
 
-
-
 //Project API
 //Add a project
 app.post("/api/projects", async (req, res) => {
   console.log("post /api/projects hit");
 
-  const project = new Project({
-    userId: req.body.userId,
-    title: req.body.title,
-  });
+  let user = new User();
 
   try {
-    await project.save();
+    user = await User.findOne({ _id: req.body.userId });
+
+    const project = new Project({
+      ProjectName: req.body.projectName,
+      Tasks: [],
+    });
+
+    if (!user) {
+      res.send(404);
+      return;
+    }
+
+    user.Projects.push(project);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+
+  try {
+    await user.save();
     res.sendStatus(200);
   } catch (error) {
     console.log(error);
@@ -115,7 +133,8 @@ app.get("/api/projects/:userId", async (req, res) => {
   console.log("get /api/projects/:userId hit");
 
   try {
-    let projects = await Project.find({ userId: req.params.userId });
+    let user = await User.findOne({ _id: req.params.userId });
+    const projects = user.Projects;
     res.send(projects);
   } catch (error) {
     console.log(error);
@@ -128,9 +147,23 @@ app.get("/api/projects/:userId", async (req, res) => {
 // app.delete("/api/projects/:projectId", async (req, res) => {
 //   console.log("delete /api/projects/:projectID hit");
 
-//   try {
-//     let project = await Project.findOne({ _id: req.params.projectId });
-//   }
+  try {
+    let project = await Project.findOne({ _id: req.params.projectId });
+
+    if (!project) {
+      res.send(404);
+      return;
+    }
+    let tasks = project.Tasks;
+    for (task of tasks) {
+      await task.delete();
+    }
+    await project.delete();
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 
 //   var sql = "DELETE FROM Task WHERE ProjectID = ?;";
 //   con.query(sql, [req.params.projectId], function (err, result) {
@@ -149,12 +182,45 @@ app.get("/api/projects/:userId", async (req, res) => {
 //   });
 // });
 
-//Task API
+//Task API    Currently worked on by cam
 //add a task
 app.post("/api/projects/:projectID/timers", async (req, res) => {
   console.log("post /api/projects/:projectID/timers hit");
   console.log(req.params.projectID);
   console.log(req.body.title);
+
+//***************************************** */
+let task = new Task();
+
+try {
+  project = await Project.findOne({ _id: req.params.projectID });
+
+  const task = new Task({
+    TaskName: req.body.title,
+    TotalTime: 0,
+    Active: false,
+    LastEdited: null,
+  });
+
+  if (!project) {
+    res.send(404);
+    return;
+  }
+
+  
+
+  user.Projects.push(project);
+} catch (error) {
+  console.log(error);
+  res.sendStatus(500);
+}
+
+
+
+
+
+//***************************************** */
+
   var sql =
     "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
   con.query(

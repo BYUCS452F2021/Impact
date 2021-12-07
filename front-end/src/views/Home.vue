@@ -44,7 +44,7 @@ export default {
       if (this.projectName.length != 0) {
         try {
           await axios.post("/api/projects", {
-            title: this.projectName,
+            projectName: this.projectName,
             userId: this.$root.$data.user.UserID,
           });
           this.projectName = "";
@@ -56,7 +56,9 @@ export default {
     },
     async getProjects() {
       try {
-        const response = await axios.get(`/api/projects/${this.$root.$data.user.UserID}`);
+        const response = await axios.get(
+          `/api/projects/${this.$root.$data.user.UserID}`
+        );
         console.log(response.data);
         this.projects = response.data;
       } catch (error) {
