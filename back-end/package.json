@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "argon2": "^0.28.3",
     "express": "^4.17.1",
+    "mongoose": "^6.0.15",
     "mysql": "^2.18.1"
   }
 }
