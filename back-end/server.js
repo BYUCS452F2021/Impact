@@ -142,6 +142,39 @@ app.post("/api/projects/:projectID/timers", async (req, res) => {
   console.log("post /api/projects/:projectID/timers hit");
   console.log(req.params.projectID);
   console.log(req.body.title);
+
+//***************************************** */
+let task = new Task();
+
+try {
+  project = await Project.findOne({ _id: req.params.projectID });
+
+  const task = new Task({
+    TaskName: req.body.title,
+    TotalTime: 0,
+    Active: false,
+    LastEdited: null,
+  });
+
+  if (!project) {
+    res.send(404);
+    return;
+  }
+
+  
+
+  user.Projects.push(project);
+} catch (error) {
+  console.log(error);
+  res.sendStatus(500);
+}
+
+
+
+
+
+//***************************************** */
+
   var sql =
     "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
   con.query(
