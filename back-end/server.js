@@ -20,41 +20,46 @@ const taskSchema = new mongoose.Schema({
   TaskName: String,
   TotalTime: Number,
   Active: Boolean,
-  LastEdited: Date
+  LastEdited: Date,
 });
 const Task = mongoose.model("Task", taskSchema);
 const projectSchema = new mongoose.Schema({
   ProjectName: String,
-  Tasks: [{
-    type: mongoose.Schema.ObjectId,
-    ref: 'Task'
-  }]
+  Tasks: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Task",
+    },
+  ],
 });
 const Project = mongoose.model("Project", projectSchema);
 const userSchema = new mongoose.Schema({
-  Projects: [{
-    type: mongoose.Schema.ObjectId,
-    ref: 'Project'
-  }],
+  Projects: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Project",
+    },
+  ],
   FirstName: String,
   LastName: String,
   UserName: String,
-  Password: String
+  Password: String,
 });
 const User = mongoose.model("User", userSchema);
-
 
 //Project API
 //Add a project
 app.post("/api/projects", async (req, res) => {
   console.log("post /api/projects hit");
 
+  let user = new User();
+
   try {
-    const user = await User.findOne({ _id: req.body.userId });
+    user = await User.findOne({ _id: req.body.userId });
 
     const project = new Project({
       ProjectName: req.body.projectName,
-      Tasks: []
+      Tasks: [],
     });
 
     if (!user) {
@@ -62,15 +67,14 @@ app.post("/api/projects", async (req, res) => {
       return;
     }
 
-    user.Projects.push()
-
+    user.Projects.push(project);
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
   }
-  
+
   try {
-    await project.save();
+    await user.save();
     res.sendStatus(200);
   } catch (error) {
     console.log(error);
@@ -84,7 +88,7 @@ app.get("/api/projects/:userId", async (req, res) => {
 
   try {
     let user = await User.findOne({ _id: req.params.userId });
-    const projects = user.Projects
+    const projects = user.Projects;
     res.send(projects);
   } catch (error) {
     console.log(error);
@@ -99,6 +103,20 @@ app.delete("/api/projects/:projectId", async (req, res) => {
 
   try {
     let project = await Project.findOne({ _id: req.params.projectId });
+
+    if (!project) {
+      res.send(404);
+      return;
+    }
+    let tasks = project.Tasks;
+    for (task of tasks) {
+      await task.delete();
+    }
+    await project.delete();
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
   }
 
   var sql = "DELETE FROM Task WHERE ProjectID = ?;";
