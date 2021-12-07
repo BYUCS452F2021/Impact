@@ -144,45 +144,30 @@ app.get("/api/projects/:userId", async (req, res) => {
 });
 
 //Delete the project
-// app.delete("/api/projects/:projectId", async (req, res) => {
-//   console.log("delete /api/projects/:projectID hit");
+app.delete("/api/projects/:projectId", async (req, res) => {
+  console.log("delete /api/projects/:projectID hit");
 
-  try {
-    let project = await Project.findOne({ _id: req.params.projectId });
+try {
+  let project = await Project.findOne({ _id: req.params.projectId });
 
-    if (!project) {
-      res.send(404);
-      return;
-    }
-    let tasks = project.Tasks;
-    for (task of tasks) {
-      await task.delete();
-    }
-    await project.delete();
-    res.sendStatus(200);
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
+  if (!project) {
+    res.send(404);
+    return;
   }
+  let tasks = project.Tasks;
+  for (task of tasks) {
+    await task.delete();
+  }
+  await project.delete();
+  res.sendStatus(200);
+} catch (error) {
+  console.log(error);
+  res.sendStatus(500);
+}
+});
 
-//   var sql = "DELETE FROM Task WHERE ProjectID = ?;";
-//   con.query(sql, [req.params.projectId], function (err, result) {
-//     if (err) {
-//       res.sendStatus(500);
-//       throw err;
-//     }
-//     var sql = "DELETE FROM Project WHERE ProjectID = ?;";
-//     con.query(sql, [req.params.projectId], function (err, result) {
-//       if (err) {
-//         res.sendStatus(500);
-//         throw err;
-//       }
-//       res.send(result);
-//     });
-//   });
-// });
 
-//Task API    Currently worked on by cam
+//Task API    
 //add a task
 app.post("/api/projects/:projectID/timers", async (req, res) => {
   console.log("post /api/projects/:projectID/timers hit");
@@ -244,107 +229,40 @@ app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
 // start timer
 app.put("/api/projects/:projectID/timers/:timerID/start", async (req, res) => {
 
-
-  /**
-   * TaskName: String,
-  TotalTime: Number,
-  Active: Boolean,
-  LastEdited: Date,
-   */
-
-// #############################
-// let project = await Project.findOne({ _id: req.params.projectId });
-// let task = await project.findOne({ _id: req.params.timerID })
-
-let timer = await Task.findOne({_id:req.params.timerID, project: req.params.projectID});
-
-
-
-
-// #############################
-  console.log("put /api/projects/:projectID/timers/:timerID/start hit");
-
-  var sqlSelect = "SELECT * FROM Task WHERE TaskID = ?";
-  con.query(sqlSelect, [req.params.timerID], function (err, result) {
-    if (err) {
-      res.sendStatus(500);
-      throw err;
+  try {
+    let timer = await Task.findOne({ _id: req.params.timerID, project: req.params.projectID });
+    if (!timer) {
+      res.send(404);
+      return;
     }
-    console.log("Timer started");
-    let task = result;
-    console.log(Date(task.LastEdited));
-    task.LastEdited = Date.now(); // /1000 because this is milliseconds mysql needs seconds
-    var sqlUpdateTime = "UPDATE Task SET Active = true WHERE TaskID = ?";
-    console.log(task.TaskID);
-    con.query(sqlUpdateTime, [req.params.timerID], function (err, result) {
-      if (err) {
-        res.sendStatus(500);
-        throw err;
-      }
-      console.log(result);
-      console.log("Time updated");
-      console.log("about to update lastedited");
-      var sqlUpdateLastEdited =
-        "UPDATE Task SET LastEdited = NOW() WHERE TaskId = ?";
-      con.query(
-        sqlUpdateLastEdited,
-        [req.params.timerID],
-        function (err, result) {
-          if (err) {
-            res.sendStatus(500);
-            throw err;
-          }
-          console.log(result);
-
-          console.log("LastEdited updated");
-          res.sendStatus(200);
-        }
-      );
-    });
-  });
+    timer.Active = true;
+    timer.LastEdited = Date.now();
+    await timer.save();
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 });
+
+
 //Stop timer
 app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
-  console.log("put /api/projects/:projectID/timers/:timerID/stop hit");
-
-  var sqlSelect = "SELECT * FROM Task WHERE TaskID = ?";
-  con.query(sqlSelect, [req.params.timerID], function (err, result) {
-    if (err) {
-      res.sendStatus(500);
-      throw err;
+  try {
+    let timer = await Task.findOne({_id:req.params.timerID, project: req.params.projectID});
+    if (!timer) {
+      res.send(404);
+      return;
     }
-    console.log("Timer stopped");
-    result = JSON.parse(JSON.stringify(result));
-    console.log(result);
-    let task = result[0];
-    console.log(task);
-    console.log(new Date(task.LastEdited).getTime());
-    var sqlUpdateTime = "UPDATE Task SET Active = false WHERE TaskID = ?";
-    console.log(task.TaskID);
-    con.query(sqlUpdateTime, [req.params.timerID], function (err, result) {
-      if (err) {
-        res.sendStatus(500);
-        throw err;
-      }
-      task.TotalTime =
-        task.TotalTime +
-        Math.floor((Date.now() - new Date(task.LastEdited).getTime()) / 1000);
-      task.LastEdited = Date.now();
-      var sqlUpdateTime = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
-      con.query(
-        sqlUpdateTime,
-        [task.TotalTime, task.TaskID],
-        function (err, result) {
-          if (err) {
-            res.sendStatus(500);
-            throw err;
-          }
-          console.log("Time updated");
-          res.sendStatus(200);
-        }
-      );
-    });
-  });
+    timer.TotalTime = timer.TotalTime + ((Date.now() / 1000 / 60) - (timer.lastEdited / 1000 / 60));
+    timer.Active = false;
+    timer.LastEdited = Date.now();
+    await timer.save();
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 });
 
 //update a task's TotalTime
