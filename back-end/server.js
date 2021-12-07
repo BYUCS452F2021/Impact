@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const mysql = require("mysql");
+const mongoose = require("mongoose");
 const app = express();
 
 app.use(bodyParser.json());
@@ -10,16 +10,10 @@ app.use(
   })
 );
 
-var con = mysql.createConnection({
-  host: "127.0.0.1",
-  user: "root",
-  password: "password",
-  database: "impact",
-});
-
-con.connect(function (err) {
-  if (err) throw err;
-  console.log("Connected!");
+// connect to the database
+mongoose.connect("mongodb://localhost:27017/impact", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
 //Project API
@@ -29,7 +23,7 @@ app.post("/api/projects", async (req, res) => {
   var sql = "INSERT INTO Project (UserID, ProjectName) VALUES (?, ?);";
 
   con.query(sql, [req.body.userId, req.body.title], function (err, result) {
-    if (err)  {
+    if (err) {
       res.sendStatus(500);
       throw err;
     }
@@ -45,14 +39,14 @@ app.get("/api/projects/:userId", async (req, res) => {
 
   var sql = "SELECT * FROM Project WHERE UserID = ?;";
   con.query(sql, [req.params.userId], function (err, result) {
-    if (err)  {
+    if (err) {
       sendStatus(500);
       throw err;
     }
     // res.sendStatus(200);
-    result=JSON.parse(JSON.stringify(result));
+    result = JSON.parse(JSON.stringify(result));
     console.log(result);
-    res.send(result)
+    res.send(result);
     console.log("All records selected");
   });
 });
@@ -68,7 +62,7 @@ app.delete("/api/projects/:projectId", async (req, res) => {
       throw err;
     }
     var sql = "DELETE FROM Project WHERE ProjectID = ?;";
-    con.query(sql, [req.params.projectId], function(err, result) {
+    con.query(sql, [req.params.projectId], function (err, result) {
       if (err) {
         res.sendStatus(500);
         throw err;
@@ -80,21 +74,25 @@ app.delete("/api/projects/:projectId", async (req, res) => {
 
 //Task API
 //add a task
-app.post('/api/projects/:projectID/timers', async (req, res) => {
+app.post("/api/projects/:projectID/timers", async (req, res) => {
   console.log("post /api/projects/:projectID/timers hit");
   console.log(req.params.projectID);
   console.log(req.body.title);
-  var sql = "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
-    con.query(sql, [req.params.projectID, req.body.title, 0],
-      function(err, results){
-        if (err) {
-          res.sendStatus(500);
-          throw err;
-        }
-        // res.sendStatus(200);
-        res.send(results)
-      });
-    });
+  var sql =
+    "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
+  con.query(
+    sql,
+    [req.params.projectID, req.body.title, 0],
+    function (err, results) {
+      if (err) {
+        res.sendStatus(500);
+        throw err;
+      }
+      // res.sendStatus(200);
+      res.send(results);
+    }
+  );
+});
 
 //get all tasks for a project
 app.get("/api/projects/:projectID/timers", async (req, res) => {
@@ -102,19 +100,18 @@ app.get("/api/projects/:projectID/timers", async (req, res) => {
   console.log(req.params.projectID);
 
   var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
-    con.query(sql, [req.params.projectID], function (error, results) {
-      if (error) {
-        console.error("Error while getting tasks for project", err.message);
-        res.sendStatus(500);
-        throw(error);
-      }
-      // res.sendStatus(200);
-      results=JSON.parse(JSON.stringify(results));
-      console.log(results);
-      res.send(results)
-    });
+  con.query(sql, [req.params.projectID], function (error, results) {
+    if (error) {
+      console.error("Error while getting tasks for project", err.message);
+      res.sendStatus(500);
+      throw error;
+    }
+    // res.sendStatus(200);
+    results = JSON.parse(JSON.stringify(results));
+    console.log(results);
+    res.send(results);
+  });
 });
-
 
 // start timer
 app.put("/api/projects/:projectID/timers/:timerID/start", async (req, res) => {
@@ -140,20 +137,23 @@ app.put("/api/projects/:projectID/timers/:timerID/start", async (req, res) => {
       console.log(result);
       console.log("Time updated");
       console.log("about to update lastedited");
-      var sqlUpdateLastEdited = "UPDATE Task SET LastEdited = NOW() WHERE TaskId = ?";
-      con.query(sqlUpdateLastEdited, [req.params.timerID], function (err, result) {
-        if (err) {
-          res.sendStatus(500);
-          throw err;
+      var sqlUpdateLastEdited =
+        "UPDATE Task SET LastEdited = NOW() WHERE TaskId = ?";
+      con.query(
+        sqlUpdateLastEdited,
+        [req.params.timerID],
+        function (err, result) {
+          if (err) {
+            res.sendStatus(500);
+            throw err;
+          }
+          console.log(result);
+
+          console.log("LastEdited updated");
+          res.sendStatus(200);
         }
-        console.log(result);
-
-        console.log("LastEdited updated");
-        res.sendStatus(200);
-
-      });
+      );
     });
-    
   });
 });
 //Stop timer
@@ -167,7 +167,7 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
       throw err;
     }
     console.log("Timer stopped");
-    result=JSON.parse(JSON.stringify(result));
+    result = JSON.parse(JSON.stringify(result));
     console.log(result);
     let task = result[0];
     console.log(task);
@@ -180,17 +180,22 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
         throw err;
       }
       task.TotalTime =
-      task.TotalTime + (Math.floor(((Date.now() - (new Date(task.LastEdited).getTime()))/1000)));
+        task.TotalTime +
+        Math.floor((Date.now() - new Date(task.LastEdited).getTime()) / 1000);
       task.LastEdited = Date.now();
       var sqlUpdateTime = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
-      con.query(sqlUpdateTime, [task.TotalTime, task.TaskID], function (err, result) {
-        if (err) {
-          res.sendStatus(500);
-          throw err;
+      con.query(
+        sqlUpdateTime,
+        [task.TotalTime, task.TaskID],
+        function (err, result) {
+          if (err) {
+            res.sendStatus(500);
+            throw err;
+          }
+          console.log("Time updated");
+          res.sendStatus(200);
         }
-        console.log("Time updated");
-        res.sendStatus(200);
-      });
+      );
     });
   });
 });
@@ -227,7 +232,7 @@ app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
   });
 });
 
-//Time API - implement post MVP 
+//Time API - implement post MVP
 
 //User API
 //Register a User
@@ -254,11 +259,10 @@ app.post("/api/user/register", async (req, res) => {
       }
       // res.sendStatus(200);
       console.log(result);
-      result=JSON.parse(JSON.stringify(result));
+      result = JSON.parse(JSON.stringify(result));
       console.log(result);
-      console.log({user: result});
-      res.send({user: result});
-
+      console.log({ user: result });
+      res.send({ user: result });
     }
   );
 });
@@ -280,11 +284,11 @@ app.post("/api/user/login", async (req, res) => {
         console.log("Error while logging in a user");
         throw err;
       } else {
-        console.log('success finding user for login, trying to send result');
+        console.log("success finding user for login, trying to send result");
         // res.sendStatus(200);
-        result=JSON.parse(JSON.stringify(result));
-        console.log({user: result[0]});
-        res.send({user: result[0]});
+        result = JSON.parse(JSON.stringify(result));
+        console.log({ user: result[0] });
+        res.send({ user: result[0] });
         console.log("valid user found");
       }
     }
