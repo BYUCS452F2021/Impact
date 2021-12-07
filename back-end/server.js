@@ -143,75 +143,79 @@ app.post("/api/projects/:projectID/timers", async (req, res) => {
   console.log(req.params.projectID);
   console.log(req.body.title);
 
-//***************************************** */
-let task = new Task();
+  //***************************************** */
+  let task = new Task();
 
-try {
-  project = await Project.findOne({ _id: req.params.projectID });
+  try {
+    let project = await Project.findOne({ _id: req.params.projectID });
 
-  const task = new Task({
-    TaskName: req.body.title,
-    TotalTime: 0,
-    Active: false,
-    LastEdited: null,
-  });
+    const task = new Task({
+      TaskName: req.body.title,
+      TotalTime: 0,
+      Active: false,
+      LastEdited: null,
+    });
 
-  if (!project) {
-    res.send(404);
-    return;
+    if (!project) {
+      res.send(404);
+      return;
+    }
+
+    project.Tasks.push(task);
+
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
   }
 
-  
-
-  user.Projects.push(project);
-} catch (error) {
-  console.log(error);
-  res.sendStatus(500);
-}
-
-
-
-
-
-//***************************************** */
-
-  var sql =
-    "INSERT INTO Task (ProjectID, TaskName, TotalTime) VALUES (?, ?, ?);";
-  con.query(
-    sql,
-    [req.params.projectID, req.body.title, 0],
-    function (err, results) {
-      if (err) {
-        res.sendStatus(500);
-        throw err;
-      }
-      // res.sendStatus(200);
-      res.send(results);
-    }
-  );
+  try {
+    await project.save();
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 });
 
 //get all tasks for a project
-app.get("/api/projects/:projectID/timers", async (req, res) => {
-  console.log("get /api/projects/:projectID/timers hit");
-  console.log(req.params.projectID);
-
-  var sql = "SELECT * FROM Task WHERE ProjectID = ?;";
-  con.query(sql, [req.params.projectID], function (error, results) {
-    if (error) {
-      console.error("Error while getting tasks for project", err.message);
-      res.sendStatus(500);
-      throw error;
+app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
+  console.log("delete /api/projects/:projectID/timers/:timerID hit");
+  try {
+    let project = await Project.findOne({ _id: req.params.projectId });
+    let task = await project.findOne({ _id: req.params.timerID })
+    if (!task) {
+      res.send(404);
+      return;
     }
-    // res.sendStatus(200);
-    results = JSON.parse(JSON.stringify(results));
-    console.log(results);
-    res.send(results);
-  });
+    await task.delete();
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 });
 
 // start timer
 app.put("/api/projects/:projectID/timers/:timerID/start", async (req, res) => {
+
+
+  /**
+   * TaskName: String,
+  TotalTime: Number,
+  Active: Boolean,
+  LastEdited: Date,
+   */
+
+// #############################
+// let project = await Project.findOne({ _id: req.params.projectId });
+// let task = await project.findOne({ _id: req.params.timerID })
+
+let timer = await Task.findOne({_id:req.params.timerID, project: req.params.projectID});
+
+
+
+
+// #############################
   console.log("put /api/projects/:projectID/timers/:timerID/start hit");
 
   var sqlSelect = "SELECT * FROM Task WHERE TaskID = ?";
