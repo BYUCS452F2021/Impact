@@ -45,7 +45,7 @@ export default {
         try {
           await axios.post("/api/projects", {
             projectName: this.projectName,
-            userId: this.$root.$data.user.UserID,
+            userId: this.$root.$data.user._id,
           });
           this.projectName = "";
           await this.getProjects();
@@ -57,7 +57,7 @@ export default {
     async getProjects() {
       try {
         const response = await axios.get(
-          `/api/projects/${this.$root.$data.user.UserID}`
+          `/api/projects/${this.$root.$data.user._id}`
         );
         console.log(response.data);
         this.projects = response.data;
