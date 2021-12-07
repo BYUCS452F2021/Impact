@@ -52,35 +52,33 @@ const User = mongoose.model('User', userSchema);
 //Add a project
 app.post("/api/projects", async (req, res) => {
   console.log("post /api/projects hit");
-  var sql = "INSERT INTO Project (UserID, ProjectName) VALUES (?, ?);";
 
-  con.query(sql, [req.body.userId, req.body.title], function (err, result) {
-    if (err) {
-      res.sendStatus(500);
-      throw err;
-    }
-    console.log("1 record inserted");
-    // res.sendStatus(200);
-    res.send(result);
+  const project = new Project({
+    userId: req.body.userId,
+    title: req.body.title,
   });
+
+  try {
+    await project.save();
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 });
 
 //Get all project
 app.get("/api/projects/:userId", async (req, res) => {
   console.log("get /api/projects/:userId hit");
 
-  var sql = "SELECT * FROM Project WHERE UserID = ?;";
-  con.query(sql, [req.params.userId], function (err, result) {
-    if (err) {
-      sendStatus(500);
-      throw err;
-    }
-    // res.sendStatus(200);
-    result = JSON.parse(JSON.stringify(result));
-    console.log(result);
-    res.send(result);
-    console.log("All records selected");
-  });
+  try {
+    let projects = await Project.find({ userId: req.params.userId });
+    res.send(projects);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+  console.log("All records selected");
 });
 
 //Delete the project
