@@ -49,11 +49,26 @@ const User = mongoose.model("User", userSchema);
 app.post("/api/projects", async (req, res) => {
   console.log("post /api/projects hit");
 
-  const project = new Project({
-    userId: req.body.userId,
-    title: req.body.title,
-  });
+  try {
+    const user = await User.findOne({ _id: req.body.userId });
 
+    const project = new Project({
+      ProjectName: req.body.projectName,
+      Tasks: []
+    });
+
+    if (!user) {
+      res.send(404);
+      return;
+    }
+
+    user.Projects.push()
+
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+  
   try {
     await project.save();
     res.sendStatus(200);
@@ -68,7 +83,8 @@ app.get("/api/projects/:userId", async (req, res) => {
   console.log("get /api/projects/:userId hit");
 
   try {
-    let projects = await Project.find({ userId: req.params.userId });
+    let user = await User.findOne({ _id: req.params.userId });
+    const projects = user.Projects
     res.send(projects);
   } catch (error) {
     console.log(error);
