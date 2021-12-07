@@ -22,9 +22,7 @@ const taskSchema = new mongoose.Schema({
   Active: Boolean,
   LastEdited: Date
 });
-
-const Task = mongoose.model('Task', taskSchema);
-
+const Task = mongoose.model("Task", taskSchema);
 const projectSchema = new mongoose.Schema({
   ProjectName: String,
   Tasks: [{
@@ -32,9 +30,7 @@ const projectSchema = new mongoose.Schema({
     ref: 'Task'
   }]
 });
-
-const Project = mongoose.model('Project', projectSchema);
-
+const Project = mongoose.model("Project", projectSchema);
 const userSchema = new mongoose.Schema({
   Projects: [{
     type: mongoose.Schema.ObjectId,
@@ -45,8 +41,8 @@ const userSchema = new mongoose.Schema({
   UserName: String,
   Password: String
 });
+const User = mongoose.model("User", userSchema);
 
-const User = mongoose.model('User', userSchema);
 
 //Project API
 //Add a project
@@ -84,6 +80,10 @@ app.get("/api/projects/:userId", async (req, res) => {
 //Delete the project
 app.delete("/api/projects/:projectId", async (req, res) => {
   console.log("delete /api/projects/:projectID hit");
+
+  try {
+    let project = await Project.findOne({ _id: req.params.projectId });
+  }
 
   var sql = "DELETE FROM Task WHERE ProjectID = ?;";
   con.query(sql, [req.params.projectId], function (err, result) {
@@ -188,7 +188,7 @@ app.put("/api/projects/:projectID/timers/:timerID/start", async (req, res) => {
 });
 //Stop timer
 app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
-  console.log("put /api/projects/:projectID/timers/:timerID/sto hit");
+  console.log("put /api/projects/:projectID/timers/:timerID/stop hit");
 
   var sqlSelect = "SELECT * FROM Task WHERE TaskID = ?";
   con.query(sqlSelect, [req.params.timerID], function (err, result) {
