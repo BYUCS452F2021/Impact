@@ -231,21 +231,22 @@ app.post("/api/projects/:projectID/timers", async (req, res) => {
 });
 
 //get all tasks for a project
-app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
-  console.log("delete /api/projects/:projectID/timers/:timerID hit");
+app.get("/api/projects/:projectID/timers", async (req, res) => {
+  console.log("get /api/projects/:projectID/timers hit");
   try {
-    let project = await Project.findOne({ _id: req.params.projectId });
-    let task = await project.findOne({ _id: req.params.timerID });
-    if (!task) {
-      res.send(404);
-      return;
+    let project = await Project.findOne({ _id: req.params.projectID });
+    const tasks = project.Tasks;
+    const taskArray = [];
+    for (const task of tasks) {
+      const taskObject = await Task.findOne({ _id: task });
+      taskArray.push(taskObject);
     }
-    await task.delete();
-    res.sendStatus(200);
+    res.send(taskArray);
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
   }
+  console.log("All records selected");
 });
 
 // start timer
