@@ -315,14 +315,29 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
 app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
   console.log("delete /api/projects/:projectID/timers/:timerID hit");
 
-  var sql = "DELETE FROM Task WHERE TaskID = ?;";
-  con.query(sql, [req.params.timerID], function (err, result) {
-    if (err) {
-      res.sendStatus(500);
-      throw err;
+  try {
+    const taskToDelete = await Task.findOne({ _id: req.params.timerID });
+    const project = await Project.findOne({ _id: req.params.projectID });
+    console.log(project);
+
+    if (!project || !taskToDelete) {
+      res.send(404);
+      return;
     }
-    res.send(result);
-  });
+
+    const index = project.Tasks.indexOf(taskToDelete._id);
+    if (index != -1) {
+      project.Tasks.splice(index, 1);
+    }
+
+    await project.save();
+
+    await Task.deleteOne(taskToDelete);
+    res.status(200).send(taskToDelete.toJSON());
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 });
 
 //Time API - implement post MVP
