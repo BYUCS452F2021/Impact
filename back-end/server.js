@@ -293,24 +293,6 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
   }
 });
 
-//update a task's TotalTime
-// app.put("/api/tasks/:id", async (req, res) => {
-//   console.log("put /api/tasks/:id hit");
-
-//   var sql = "UPDATE Task SET TotalTime = ? WHERE TaskID = ?";
-
-//     con.query(sql)[(req.body.TotalTime, req.body.TaskID)],
-//       function (err, results) {
-//         if (err) {
-//           res.sendStatus(500);
-//           console.log("Error while updating TotalTime");
-//           throw err;
-//         }
-//         // res.sendStatus(200);
-//         res.send(results);
-//       };
-// });
-
 //delete a task
 app.delete("/api/projects/:projectID/timers/:timerID", async (req, res) => {
   console.log("delete /api/projects/:projectID/timers/:timerID hit");
