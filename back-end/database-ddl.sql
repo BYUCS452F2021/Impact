@@ -20,6 +20,8 @@ CREATE TABLE Task(
 	ProjectID int NOT NULL,
 	TaskName varchar(255) NOT NULL,
 	TotalTime int DEFAULT 0,
+	Active BOOLEAN DEFAULT false,
+	LastEdited DATETIME,
 	PRIMARY KEY(TaskID),
 	FOREIGN KEY(ProjectID) REFERENCES Project(ProjectID)
 );
