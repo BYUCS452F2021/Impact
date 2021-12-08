@@ -97,8 +97,8 @@ const User = mongoose.model("User", userSchema);
 app.post("/api/projects", async (req, res) => {
   console.log("post /api/projects hit");
 
-  let user = new User();
-  let project = new Project();
+  let user = null;
+  let project = null;
 
   try {
     user = await User.findOne({ _id: req.body.userId });
@@ -196,11 +196,12 @@ app.post("/api/projects/:projectID/timers", async (req, res) => {
 
   //***************************************** */
   let task = new Task();
+  let project = new Project();
 
   try {
-    let project = await Project.findOne({ _id: req.params.projectID });
+    project = await Project.findOne({ _id: req.params.projectID });
 
-    const task = new Task({
+    task = new Task({
       TaskName: req.body.title,
       TotalTime: 0,
       Active: false,
@@ -212,10 +213,12 @@ app.post("/api/projects/:projectID/timers", async (req, res) => {
       return;
     }
 
+    task.save();
     project.Tasks.push(task);
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
+    return;
   }
 
   try {
