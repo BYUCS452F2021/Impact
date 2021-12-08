@@ -67,7 +67,9 @@ export default {
     },
     async deleteProject(project) {
       try {
-        await axios.delete(`/api/projects/${project.ProjectID}`);
+        await axios.delete(
+          `/api/projects/${project._id}/${this.$root.$data.user._id}`
+        );
         await this.getProjects();
       } catch (error) {
         console.log(error);
