@@ -3,7 +3,11 @@
     <div
       class="timer-toggle"
       v-on:click="toggleTimer()"
-      v-bind:style="[timer.Active ? { 'background-color': '#ce3d35' } : { 'background-color': '#5daa5d' }]"
+      v-bind:style="[
+        timer.Active
+          ? { 'background-color': '#ce3d35' }
+          : { 'background-color': '#5daa5d' },
+      ]"
     >
       <p>{{ timerText }}</p>
     </div>
@@ -29,7 +33,7 @@ export default {
       return "START";
     },
     timerTime() {
-      return Math.round((this.timer.TotalTime/60) * 100) / 100;
+      return this.timer.TotalTime.toFixed(2);
     },
   },
   props: {
@@ -59,16 +63,17 @@ export default {
   margin-bottom: 10px;
 }
 
-.timer-toggle, .timer-remove {
+.timer-toggle,
+.timer-remove {
   width: 100%;
   height: 100%;
   display: grid;
   align-items: center;
   cursor: pointer;
-  
 }
 
-.timer-toggle p, .timer-remove p {
+.timer-toggle p,
+.timer-remove p {
   width: fit-content;
   margin: 0 auto;
   color: whitesmoke;
@@ -78,8 +83,8 @@ export default {
   background-color: #ce3d35;
 }
 
-.timer-toggle:hover , .timer-remove:hover {
+.timer-toggle:hover,
+.timer-remove:hover {
   filter: opacity(0.8);
 }
-
 </style>

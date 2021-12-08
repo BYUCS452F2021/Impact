@@ -282,7 +282,7 @@ app.put("/api/projects/:projectID/timers/:timerID/stop", async (req, res) => {
       return;
     }
     timer.TotalTime =
-      timer.TotalTime + (Date.now() / 1000 / 60 - timer.lastEdited / 1000 / 60);
+      timer.TotalTime + (Date.now() / 1000 / 60 - timer.LastEdited / 1000 / 60);
     timer.Active = false;
     timer.LastEdited = Date.now();
     await timer.save();
