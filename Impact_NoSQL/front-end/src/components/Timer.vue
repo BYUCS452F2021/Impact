@@ -3,16 +3,12 @@
     <div
       class="timer-toggle"
       v-on:click="toggleTimer()"
-      v-bind:style="[
-        timer.Active
-          ? { 'background-color': '#ce3d35' }
-          : { 'background-color': '#5daa5d' },
-      ]"
+      v-bind:style="[timer.active ? { 'background-color': '#ce3d35' } : { 'background-color': '#5daa5d' }]"
     >
       <p>{{ timerText }}</p>
     </div>
     <div class="timer-title">
-      <p>{{ timer.TaskName }}</p>
+      <p>{{ timer.title }}</p>
     </div>
     <div class="timer-total">
       <p>{{ timerTime }} min</p>
@@ -28,12 +24,12 @@ export default {
   name: "Timer",
   computed: {
     timerText() {
-      if (this.timer.Active) return "STOP";
+      if (this.timer.active) return "STOP";
 
       return "START";
     },
     timerTime() {
-      return this.timer.TotalTime.toFixed(2);
+      return Math.round(this.timer.time * 100) / 100;
     },
   },
   props: {
@@ -41,7 +37,7 @@ export default {
   },
   methods: {
     toggleTimer() {
-      if (this.timer.Active) {
+      if (this.timer.active) {
         this.$emit("stop-timer");
         return;
       }
@@ -63,17 +59,16 @@ export default {
   margin-bottom: 10px;
 }
 
-.timer-toggle,
-.timer-remove {
+.timer-toggle, .timer-remove {
   width: 100%;
   height: 100%;
   display: grid;
   align-items: center;
   cursor: pointer;
+  
 }
 
-.timer-toggle p,
-.timer-remove p {
+.timer-toggle p, .timer-remove p {
   width: fit-content;
   margin: 0 auto;
   color: whitesmoke;
@@ -83,8 +78,8 @@ export default {
   background-color: #ce3d35;
 }
 
-.timer-toggle:hover,
-.timer-remove:hover {
+.timer-toggle:hover , .timer-remove:hover {
   filter: opacity(0.8);
 }
+
 </style>

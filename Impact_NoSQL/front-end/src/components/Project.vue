@@ -1,7 +1,7 @@
 <template>
   <div class="project">
     <div class="title-bar">
-      <h1 class="project-title">{{ this.project.ProjectName }}</h1>
+      <h1 class="project-title">{{this.project.title}}</h1>
       <p class="remove-project" v-on:click="$emit('delete-project')">-</p>
     </div>
     <Timer
@@ -42,6 +42,7 @@ export default {
     this.getTimers();
   },
   methods: {
+    
     toggleIsAddTimer() {
       this.timerName = "";
       this.isAddTimer = !this.isAddTimer;
@@ -126,7 +127,7 @@ export default {
   color: whitesmoke;
 }
 
-.add-timer button {
+.add-timer button  {
   margin-left: 10px;
 }
 
@@ -150,4 +151,5 @@ export default {
   padding: 0 15px;
   background-color: #ce3d35;
 }
+
 </style>

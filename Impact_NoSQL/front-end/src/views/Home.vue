@@ -1,11 +1,11 @@
 <template>
   <div class="home">
     <div class="welcome">
-      <div class="welcome-box">
-        <h1>IMPACT</h1>
-        <p>Track your time, make a difference</p>
+        <div class="welcome-box">
+          <h1>IMPACT</h1>
+          <p>Track your time, make a difference</p>
+        </div>
       </div>
-    </div>
     <div class="main-content">
       <form class="add-project-form" @submit.prevent="addProject">
         <input type="text" v-model="projectName" />
@@ -33,7 +33,6 @@ export default {
     return {
       projectName: "",
       projects: [],
-      userId: "",
     };
   },
   created() {
@@ -44,8 +43,7 @@ export default {
       if (this.projectName.length != 0) {
         try {
           await axios.post("/api/projects", {
-            projectName: this.projectName,
-            userId: this.$root.$data.user._id,
+            title: this.projectName,
           });
           this.projectName = "";
           await this.getProjects();
@@ -56,10 +54,7 @@ export default {
     },
     async getProjects() {
       try {
-        const response = await axios.get(
-          `/api/projects/${this.$root.$data.user._id}`
-        );
-        console.log(response.data);
+        const response = await axios.get("/api/projects");
         this.projects = response.data;
       } catch (error) {
         console.log(error);
@@ -67,9 +62,7 @@ export default {
     },
     async deleteProject(project) {
       try {
-        await axios.delete(
-          `/api/projects/${project._id}/${this.$root.$data.user._id}`
-        );
+        await axios.delete(`/api/projects/${project._id}`);
         await this.getProjects();
       } catch (error) {
         console.log(error);
